@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A1F44">
+<title>FIGBOR — Produção &amp; PCP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="figbor-core.css">
+<style>
+  .tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{border:0;background:transparent;color:var(--page-sub);font:inherit;font-size:13.5px;font-weight:600;padding:8px 13px;border-radius:9px;cursor:pointer}
+  .tab:hover,.tab.active{color:var(--page-fg);background:var(--chip-bg)}
+  .view{display:none}.view.active{display:block}
+  /* progress cell */
+  .pg{display:flex;align-items:center;gap:10px;min-width:150px}
+  .pg .pt{flex:1;height:9px;background:var(--track);border-radius:6px;overflow:hidden;min-width:70px}
+  .pg .pf{height:100%;border-radius:6px;background:var(--info);min-width:2px}
+  .pg .pn{font-size:12px;font-weight:700;color:var(--page-sub);min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+  /* OEE gauge card */
+  .oee{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:820px){.oee{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.oee{grid-template-columns:1fr}}
+  .oeebox{background:var(--card-bg);border:1px solid var(--card-line);border-radius:15px;padding:18px;text-align:center;box-shadow:var(--shadow)}
+  .oeebox .dl{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--page-sub)}
+  .oeebox .dv{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:8px 0 4px}
+  .oeebox .dc{font-size:11.5px;color:var(--page-sub)}
+  .oeebox.big{background:linear-gradient(135deg,var(--info),#3D82D6);border:0;color:#fff}
+  .oeebox.big .dl,.oeebox.big .dc{color:rgba(255,255,255,.85)}
+  .ring{--p:0;--col:var(--info);width:76px;height:76px;border-radius:50%;margin:2px auto 10px;
+    background:conic-gradient(var(--col) calc(var(--p)*1%),var(--track) 0);display:flex;align-items:center;justify-content:center}
+  .ring::before{content:"";width:56px;height:56px;border-radius:50%;background:var(--card-bg)}
+  .ring span{position:absolute;font-size:15px;font-weight:800}
+  .ringw{position:relative;display:flex;align-items:center;justify-content:center}
+  .sub{font-size:11px;color:var(--page-sub);font-weight:500}
+  .lineTag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--chip-bg);color:var(--page-sub);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="figChrome"></div>
+
+<main>
+  <div class="wrap">
+    <div class="pagehead"><div class="ht"><h1>Produção &amp; PCP</h1><p>Ordens de produção, plano de capacidade (PCP), matéria-prima, apontamentos de chão de fábrica e eficiência (OEE). Ambiente de demonstração — dados ilustrativos SEMALO Alimentos.</p></div>
+      <div class="ha"><button class="btn primary" id="btnNovaOP">+ Nova OP</button><button class="btn" id="btnExpGeral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar OPs</span></button></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="painel">Painel</button>
+      <button class="tab" data-view="pcp">PCP</button>
+      <button class="tab" data-view="materiaprima">Matéria-prima</button>
+      <button class="tab" data-view="ops">Ordens de Produção</button>
+      <button class="tab" data-view="apontamento">Apontamento &amp; OEE</button>
+    </div>
+
+    <!-- ============ PAINEL ============ -->
+    <section class="view active" id="view-painel">
+      <div class="kpis" id="kpisPainel"></div>
+      <div class="grid2 mt16">
+        <div class="card"><div class="ch"><h3>OPs por status</h3><span class="hint">mês corrente</span></div><div class="cb"><div class="bars" id="barsStatus"></div></div></div>
+        <div class="card"><div class="ch"><h3>Produção por linha</h3><span class="hint">unidades no mês</span></div><div class="cb"><div class="bars" id="barsLinha"></div></div></div>
+      </div>
+      <div class="card mt16"><div class="ch"><h3>Em produção agora</h3><span class="hint">tempo real — progresso produzido / planejado</span></div>
+        <div class="cb" style="padding:0 0 6px"><div class="tblwrap" style="border:0;box-shadow:none;border-radius:0">
+          <table><thead><tr><th>OP</th><th>Produto</th><th>Linha</th><th class="num">Planejado</th><th>Progresso</th><th>Prev. fim</th><th>Operador</th></tr></thead><tbody id="agoraBody"></tbody></table>
+        </div></div>
+      </div>
+      <div class="grid2 mt16">
+        <div class="card"><div class="ch"><h3>Produção diária (últimos 10 dias)</h3><span class="hint">unidades boas</span></div><div class="cb"><div class="bars" id="barsDia"></div></div></div>
+        <div class="card"><div class="ch"><h3>Refugo por produto</h3><span class="hint">% do produzido no mês</span></div><div class="cb"><div class="bars" id="barsRefugo"></div></div></div>
+      </div>
+    </section>
+
+    <!-- ============ PCP ============ -->
+    <section class="view" id="view-pcp">
+      <div class="kpis" id="kpisPcp"></div>
+      <div class="toolbar mt16">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qPcp" placeholder="Buscar produto, linha…"></div>
+        <select id="fPcpSem"><option value="">Todas as semanas</option></select>
+        <select id="fPcpStatus"><option value="">Todos os status</option><option value="ok">Atendido</option><option value="parcial">Parcial</option><option value="risco">Em risco</option><option value="gargalo">Gargalo</option></select>
+        <span class="muted" id="pcpCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Produto</th><th>Linha</th><th>Semana</th><th class="num">Demanda</th><th class="num">Capacidade</th><th class="num">Programado</th><th class="num">Gap</th><th>Status</th></tr></thead><tbody id="pcpBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ MATÉRIA-PRIMA ============ -->
+    <section class="view" id="view-materiaprima">
+      <div class="kpis" id="kpisMp"></div>
+      <div class="toolbar mt16">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qMp" placeholder="Buscar insumo…"></div>
+        <select id="fMpStatus"><option value="">Todos</option><option value="ok">OK</option><option value="baixo">Abaixo do mínimo</option></select>
+        <button class="btn" id="btnExpMp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="mpCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Insumo</th><th>Un.</th><th class="num">Saldo</th><th class="num">Consumo méd./dia</th><th class="num">Necessidade p/ OPs</th><th class="num">Cobertura</th><th class="num">Mínimo</th><th>Status</th></tr></thead><tbody id="mpBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ OPs ============ -->
+    <section class="view" id="view-ops">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qOp" placeholder="Buscar OP, produto, linha…"></div>
+        <select id="fOpStatus"><option value="">Todos os status</option><option value="planejada">Planejada</option><option value="liberada">Liberada</option><option value="producao">Em produção</option><option value="pausada">Pausada</option><option value="concluida">Concluída</option><option value="atrasada">Atrasada</option></select>
+        <select id="fOpLinha"><option value="">Todas as linhas</option></select>
+        <button class="btn" id="btnExpOp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="opCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>OP nº</th><th>Produto</th><th>Linha</th><th>Filial</th><th class="num">Planejado</th><th>Produzido</th><th>Início</th><th>Prev. fim</th><th>Status</th></tr></thead><tbody id="opBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ APONTAMENTO ============ -->
+    <section class="view" id="view-apontamento">
+      <div class="card"><div class="ch"><h3>OEE — Eficiência Global dos Equipamentos</h3><span class="hint">média turno atual · Disponibilidade × Performance × Qualidade</span></div>
+        <div class="cb"><div class="oee">
+          <div class="oeebox"><div class="dl">Disponibilidade</div><div class="ringw"><div class="ring" style="--p:91;--col:var(--ok)"><span>91%</span></div></div><div class="dc">tempo operando / previsto</div></div>
+          <div class="oeebox"><div class="dl">Performance</div><div class="ringw"><div class="ring" style="--p:88;--col:var(--info)"><span>88%</span></div></div><div class="dc">ritmo real / ritmo ideal</div></div>
+          <div class="oeebox"><div class="dl">Qualidade</div><div class="ringw"><div class="ring" style="--p:97;--col:var(--violet)"><span>97%</span></div></div><div class="dc">boas / total produzido</div></div>
+          <div class="oeebox big"><div class="dl">OEE</div><div class="dv">77,7%</div><div class="dc">meta 80% · classe mundial 85%</div></div>
+        </div></div>
+      </div>
+      <div class="toolbar mt16">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qAp" placeholder="Buscar OP, operador, linha…"></div>
+        <select id="fApLinha"><option value="">Todas as linhas</option></select>
+        <button class="btn" id="btnExpAp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="apCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>OP</th><th>Linha</th><th>Início</th><th>Fim</th><th class="num">Produzido</th><th class="num">Refugo</th><th>Parada (motivo)</th><th class="num">Min. parado</th><th>Operador</th></tr></thead><tbody id="apBody"></tbody></table></div>
+    </section>
+
+  </div>
+</main>
+<footer class="fig-foot"><div class="wrap"><b>FIGBOR · Produção &amp; PCP</b> — ambiente de demonstração SEMALO Alimentos. Dados ilustrativos.</div></footer>
+
+<!-- MODAL nova OP (demo) -->
+<div class="overlay" id="mdOP"><div class="modal"><div class="mh"><h3>Nova Ordem de Produção</h3><button class="xbtn" data-close="mdOP">×</button></div>
+  <div class="mb"><div class="formgrid">
+    <div class="field"><label>OP nº</label><input id="o_num" placeholder="auto se vazio"></div>
+    <div class="field"><label>Filial</label><select id="o_filial"><option>2 - MS/MATRIZ</option><option>6 - FILIAL RS</option><option>10 - FILIAL DF</option><option>12 - FILIAL PR</option><option>SP - SÃO PAULO</option></select></div>
+    <div class="field full"><label>Produto <span class="req">*</span></label><select id="o_prod"></select></div>
+    <div class="field"><label>Linha</label><select id="o_linha"></select></div>
+    <div class="field"><label>Qtd planejada <span class="req">*</span></label><input id="o_qtd" type="number" min="0" step="1" placeholder="0"></div>
+    <div class="field"><label>Início</label><input id="o_ini" type="date"></div>
+    <div class="field"><label>Prev. fim</label><input id="o_fim" type="date"></div>
+    <div class="field full"><label>Observação</label><textarea id="o_obs" placeholder="Lote, prioridade, cliente…"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" data-close="mdOP">Cancelar</button><button class="btn primary" id="btnSaveOP">Criar OP</button></div>
+</div></div>
+
+<script src="figbor-core.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- catálogos ---------------- */
+  var PRODUTOS=["Molho de Tomate 340g","Maionese 3kg","Ketchup 1,01kg","Mostarda 200g","Extrato de Tomate 4,1kg","Vinagre 750ml","Molho Barbecue 400g","Shoyu 900ml","Maionese 500g","Ketchup 380g"];
+  var LINHAS=["Linha 1 - Envase","Linha 2 - Emulsão","Linha 3 - Extrato","Linha 4 - Vinagre","Linha 5 - Sachê"];
+  var FILIAIS=["2 - MS/MATRIZ","6 - FILIAL RS","10 - FILIAL DF","12 - FILIAL PR","SP - SÃO PAULO"];
+
+  var SLAB={planejada:"Planejada",liberada:"Liberada",producao:"Em produção",pausada:"Pausada",concluida:"Concluída",atrasada:"Atrasada"};
+  var SCLS={planejada:"slate",liberada:"info",producao:"warn",pausada:"violet",concluida:"ok",atrasada:"danger"};
+
+  var t=FIG.today0();
+  function d(off){var x=new Date(t);x.setDate(x.getDate()+off);return FIG.iso(x);}
+  function hm(hh,mm){return String(hh).padStart(2,"0")+":"+String(mm).padStart(2,"0");}
+
+  /* ---------------- ORDENS DE PRODUÇÃO ---------------- */
+  var OPS=[
+    {num:"OP-24118",prod:"Molho de Tomate 340g",linha:"Linha 1 - Envase",filial:"2 - MS/MATRIZ",plan:48000,prod_q:31200,ini:d(-1),fim:d(0),status:"producao",oper:"Carlos Menezes"},
+    {num:"OP-24119",prod:"Maionese 3kg",linha:"Linha 2 - Emulsão",filial:"12 - FILIAL PR",plan:9000,prod_q:5400,ini:d(-1),fim:d(0),status:"producao",oper:"Fernanda Lima"},
+    {num:"OP-24120",prod:"Extrato de Tomate 4,1kg",linha:"Linha 3 - Extrato",filial:"2 - MS/MATRIZ",plan:6200,prod_q:4900,ini:d(0),fim:d(0),status:"producao",oper:"Rogério Alves"},
+    {num:"OP-24121",prod:"Ketchup 1,01kg",linha:"Linha 1 - Envase",filial:"10 - FILIAL DF",plan:22000,prod_q:14300,ini:d(0),fim:d(1),status:"producao",oper:"Patrícia Souza"},
+    {num:"OP-24122",prod:"Vinagre 750ml",linha:"Linha 4 - Vinagre",filial:"6 - FILIAL RS",plan:36000,prod_q:9200,ini:d(0),fim:d(1),status:"producao",oper:"Marcos Oliveira"},
+    {num:"OP-24123",prod:"Molho Barbecue 400g",linha:"Linha 5 - Sachê",filial:"SP - SÃO PAULO",plan:15000,prod_q:0,ini:d(1),fim:d(2),status:"liberada",oper:"—"},
+    {num:"OP-24124",prod:"Shoyu 900ml",linha:"Linha 4 - Vinagre",filial:"12 - FILIAL PR",plan:12500,prod_q:0,ini:d(1),fim:d(2),status:"planejada",oper:"—"},
+    {num:"OP-24125",prod:"Mostarda 200g",linha:"Linha 5 - Sachê",filial:"2 - MS/MATRIZ",plan:18000,prod_q:0,ini:d(2),fim:d(3),status:"planejada",oper:"—"},
+    {num:"OP-24126",prod:"Maionese 500g",linha:"Linha 2 - Emulsão",filial:"10 - FILIAL DF",plan:24000,prod_q:11800,ini:d(-2),fim:d(-1),status:"pausada",oper:"Juliana Prado"},
+    {num:"OP-24112",prod:"Ketchup 380g",linha:"Linha 1 - Envase",filial:"6 - FILIAL RS",plan:40000,prod_q:26500,ini:d(-3),fim:d(-1),status:"atrasada",oper:"Anderson Ribeiro"},
+    {num:"OP-24108",prod:"Molho de Tomate 340g",linha:"Linha 1 - Envase",filial:"2 - MS/MATRIZ",plan:52000,prod_q:52000,ini:d(-4),fim:d(-3),status:"concluida",oper:"Carlos Menezes"},
+    {num:"OP-24109",prod:"Extrato de Tomate 4,1kg",linha:"Linha 3 - Extrato",filial:"2 - MS/MATRIZ",plan:6800,prod_q:6800,ini:d(-4),fim:d(-4),status:"concluida",oper:"Rogério Alves"},
+    {num:"OP-24110",prod:"Vinagre 750ml",linha:"Linha 4 - Vinagre",filial:"6 - FILIAL RS",plan:30000,prod_q:30000,ini:d(-5),fim:d(-4),status:"concluida",oper:"Marcos Oliveira"},
+    {num:"OP-24111",prod:"Maionese 3kg",linha:"Linha 2 - Emulsão",filial:"12 - FILIAL PR",plan:8400,prod_q:8400,ini:d(-5),fim:d(-5),status:"concluida",oper:"Fernanda Lima"},
+    {num:"OP-24107",prod:"Shoyu 900ml",linha:"Linha 4 - Vinagre",filial:"SP - SÃO PAULO",plan:11000,prod_q:11000,ini:d(-6),fim:d(-6),status:"concluida",oper:"Tânia Gonçalves"}
+  ];
+
+  /* ---------------- PCP (plano semanal) ---------------- */
+  var SEMANAS=["Sem 31 (28/07–03/08)","Sem 32 (04/08–10/08)","Sem 33 (11/08–17/08)","Sem 34 (18/08–24/08)"];
+  var PCP=[
+    {prod:"Molho de Tomate 340g",linha:"Linha 1 - Envase",sem:0,dem:210000,cap:230000,prog:210000},
+    {prod:"Ketchup 1,01kg",linha:"Linha 1 - Envase",sem:0,dem:96000,cap:90000,prog:88000},
+    {prod:"Maionese 3kg",linha:"Linha 2 - Emulsão",sem:0,dem:34000,cap:40000,prog:34000},
+    {prod:"Extrato de Tomate 4,1kg",linha:"Linha 3 - Extrato",sem:0,dem:28000,cap:26000,prog:24500},
+    {prod:"Vinagre 750ml",linha:"Linha 4 - Vinagre",sem:0,dem:120000,cap:150000,prog:120000},
+    {prod:"Mostarda 200g",linha:"Linha 5 - Sachê",sem:1,dem:64000,cap:70000,prog:64000},
+    {prod:"Molho Barbecue 400g",linha:"Linha 5 - Sachê",sem:1,dem:52000,cap:48000,prog:44000},
+    {prod:"Shoyu 900ml",linha:"Linha 4 - Vinagre",sem:1,dem:41000,cap:60000,prog:41000},
+    {prod:"Maionese 500g",linha:"Linha 2 - Emulsão",sem:1,dem:88000,cap:82000,prog:78000},
+    {prod:"Ketchup 380g",linha:"Linha 1 - Envase",sem:2,dem:145000,cap:120000,prog:110000},
+    {prod:"Molho de Tomate 340g",linha:"Linha 1 - Envase",sem:2,dem:198000,cap:230000,prog:198000},
+    {prod:"Extrato de Tomate 4,1kg",linha:"Linha 3 - Extrato",sem:2,dem:31000,cap:26000,prog:23000},
+    {prod:"Vinagre 750ml",linha:"Linha 4 - Vinagre",sem:3,dem:132000,cap:150000,prog:132000},
+    {prod:"Maionese 3kg",linha:"Linha 2 - Emulsão",sem:3,dem:37500,cap:40000,prog:37500},
+    {prod:"Mostarda 200g",linha:"Linha 5 - Sachê",sem:3,dem:71000,cap:70000,prog:66000}
+  ];
+  function pcpStatus(r){
+    var gap=r.prog-r.dem;
+    if(r.cap<r.dem) return {k:"gargalo",lab:"Gargalo",cls:"danger"};
+    if(gap>=0) return {k:"ok",lab:"Atendido",cls:"ok"};
+    if(r.prog>=r.dem*0.92) return {k:"parcial",lab:"Parcial",cls:"warn"};
+    return {k:"risco",lab:"Em risco",cls:"violet"};
+  }
+
+  /* ---------------- MATÉRIA-PRIMA ---------------- */
+  var MP=[
+    {ins:"Tomate in natura",un:"kg",saldo:184000,cons:42000,nec:210000,min:120000,custo:1.85},
+    {ins:"Óleo de soja refinado",un:"L",saldo:38500,cons:9800,nec:44000,min:30000,custo:6.40},
+    {ins:"Vinagre de álcool",un:"L",saldo:72000,cons:14500,nec:58000,min:40000,custo:2.10},
+    {ins:"Ovo pasteurizado",un:"kg",saldo:6200,cons:2400,nec:11000,min:8000,custo:12.90},
+    {ins:"Açúcar cristal",un:"kg",saldo:41000,cons:6800,nec:28000,min:25000,custo:3.55},
+    {ins:"Sal refinado",un:"kg",saldo:52000,cons:5100,nec:19000,min:18000,custo:1.20},
+    {ins:"Embalagem PET 340g",un:"un",saldo:520000,cons:210000,nec:410000,min:300000,custo:0.42},
+    {ins:"Embalagem balde 3kg",un:"un",saldo:9800,cons:3400,nec:12000,min:10000,custo:2.80},
+    {ins:"Rótulo Molho Tomate",un:"un",saldo:610000,cons:200000,nec:420000,min:250000,custo:0.06},
+    {ins:"Rótulo Ketchup",un:"un",saldo:88000,cons:90000,nec:190000,min:150000,custo:0.06},
+    {ins:"Tampa flip-top",un:"un",saldo:340000,cons:120000,nec:300000,min:280000,custo:0.11},
+    {ins:"Amido de milho",un:"kg",saldo:14500,cons:2900,nec:12000,min:10000,custo:4.20},
+    {ins:"Extrato de malte (shoyu)",un:"L",saldo:2100,cons:900,nec:4200,min:3000,custo:9.60},
+    {ins:"Filme termoencolhível",un:"kg",saldo:8600,cons:1500,nec:6800,min:6000,custo:14.30}
+  ];
+  function mpStatus(m){ return (m.saldo<m.min)?{k:"baixo",lab:"Abaixo do mínimo",cls:"danger"}:{k:"ok",lab:"OK",cls:"ok"}; }
+
+  /* ---------------- APONTAMENTOS ---------------- */
+  var AP=[
+    {op:"OP-24118",linha:"Linha 1 - Envase",ini:hm(6,0),fim:hm(9,20),prodq:14200,ref:180,par:"Ajuste de peso",parmin:18,oper:"Carlos Menezes"},
+    {op:"OP-24118",linha:"Linha 1 - Envase",ini:hm(9,40),fim:hm(12,0),prodq:17000,ref:120,par:"—",parmin:0,oper:"Carlos Menezes"},
+    {op:"OP-24119",linha:"Linha 2 - Emulsão",ini:hm(6,0),fim:hm(10,10),prodq:5400,ref:60,par:"Troca de formato / setup",parmin:34,oper:"Fernanda Lima"},
+    {op:"OP-24120",linha:"Linha 3 - Extrato",ini:hm(7,0),fim:hm(11,30),prodq:4900,ref:95,par:"Limpeza CIP",parmin:45,oper:"Rogério Alves"},
+    {op:"OP-24121",linha:"Linha 1 - Envase",ini:hm(13,0),fim:hm(16,45),prodq:14300,ref:210,par:"Falha no rótulo",parmin:22,oper:"Patrícia Souza"},
+    {op:"OP-24122",linha:"Linha 4 - Vinagre",ini:hm(7,30),fim:hm(11,0),prodq:9200,ref:70,par:"Aguardando MP",parmin:52,oper:"Marcos Oliveira"},
+    {op:"OP-24126",linha:"Linha 2 - Emulsão",ini:hm(6,0),fim:hm(12,0),prodq:11800,ref:260,par:"Manutenção corretiva",parmin:96,oper:"Juliana Prado"},
+    {op:"OP-24112",linha:"Linha 1 - Envase",ini:hm(14,0),fim:hm(22,0),prodq:26500,ref:340,par:"Falta de embalagem",parmin:74,oper:"Anderson Ribeiro"},
+    {op:"OP-24108",linha:"Linha 1 - Envase",ini:hm(6,0),fim:hm(14,0),prodq:26000,ref:150,par:"Parada programada",parmin:30,oper:"Carlos Menezes"},
+    {op:"OP-24108",linha:"Linha 1 - Envase",ini:hm(14,20),fim:hm(20,0),prodq:26000,ref:110,par:"—",parmin:0,oper:"Sandra Nogueira"},
+    {op:"OP-24110",linha:"Linha 4 - Vinagre",ini:hm(6,0),fim:hm(13,30),prodq:30000,ref:90,par:"Troca de formato / setup",parmin:28,oper:"Marcos Oliveira"},
+    {op:"OP-24107",linha:"Linha 4 - Vinagre",ini:hm(7,0),fim:hm(12,40),prodq:11000,ref:130,par:"Ajuste de peso",parmin:16,oper:"Tânia Gonçalves"}
+  ];
+
+  /* produção diária últimos 10 dias */
+  var DIAS=[];
+  (function(){var seq=[47200,39800,44100,41200,0,0,43600,45900,40300,38100];
+    for(var i=9;i>=0;i--){DIAS.push({dia:d(-i),un:seq[9-i]});}})();
+
+  var nf=FIG.nf, esc=FIG.esc, brl=FIG.brl;
+
+  /* ============ RENDER: PAINEL ============ */
+  function renderPainel(){
+    var emProd=OPS.filter(function(o){return o.status==="producao";}).length;
+    var concl=OPS.filter(function(o){return o.status==="concluida";}).length;
+    var atras=OPS.filter(function(o){return o.status==="atrasada";}).length;
+    var prodUn=OPS.reduce(function(s,o){return s+(o.status==="concluida"?o.prod_q:0);},0)+OPS.filter(function(o){return o.status==="producao";}).reduce(function(s,o){return s+o.prod_q;},0);
+    var totRef=AP.reduce(function(s,a){return s+a.ref;},0);
+    var totProdAp=AP.reduce(function(s,a){return s+a.prodq;},0);
+    var refPct=totProdAp?(totRef/(totProdAp+totRef)*100):0;
+    var kpis=[
+      {lab:"OPs em produção",val:nf(emProd),cap:"linhas ativas agora",cls:"warn"},
+      {lab:"Concluídas no mês",val:nf(concl),cap:"ordens finalizadas",cls:"ok"},
+      {lab:"Eficiência / OEE",val:"77,7%",cap:"meta 80%",cls:"info"},
+      {lab:"Produzido (un) mês",val:nf(prodUn),cap:"unidades boas",cls:"violet"},
+      {lab:"Refugo",val:refPct.toFixed(1).replace(".",",")+"%",cap:nf(totRef)+" un descartadas",cls:"danger"},
+      {lab:"OPs atrasadas",val:nf(atras),cap:"exigem ação PCP",cls:atras>0?"danger":"ok"}
+    ];
+    document.getElementById("kpisPainel").innerHTML=kpis.map(kpiHtml).join("");
+
+    var cs={};Object.keys(SLAB).forEach(function(k){cs[k]=0;});OPS.forEach(function(o){cs[o.status]++;});
+    var maxS=Math.max.apply(null,Object.keys(cs).map(function(k){return cs[k];}).concat([1]));
+    document.getElementById("barsStatus").innerHTML=Object.keys(SLAB).map(function(k){
+      return bar(SLAB[k],cs[k],maxS,"var(--"+SCLS[k]+")",nf(cs[k]));
+    }).join("");
+
+    var pl={};LINHAS.forEach(function(l){pl[l]=0;});
+    OPS.forEach(function(o){if(o.status==="concluida"||o.status==="producao")pl[o.linha]=(pl[o.linha]||0)+o.prod_q;});
+    var maxL=Math.max.apply(null,LINHAS.map(function(l){return pl[l];}).concat([1]));
+    document.getElementById("barsLinha").innerHTML=LINHAS.map(function(l){
+      return bar(l.replace(/^Linha \d+ - /,""),pl[l],maxL,"var(--info)",nf(pl[l]));
+    }).join("");
+
+    var agora=OPS.filter(function(o){return o.status==="producao";});
+    document.getElementById("agoraBody").innerHTML=agora.map(function(o){
+      var pct=o.plan?Math.round(o.prod_q/o.plan*100):0;
+      return '<tr><td class="mono">'+esc(o.num)+'</td><td class="prod">'+esc(o.prod)+'</td><td><span class="lineTag">'+esc(lineShort(o.linha))+'</span></td>'+
+        '<td class="num">'+nf(o.plan)+'</td><td>'+progress(pct,o.prod_q)+'</td><td>'+FIG.fmt(o.fim)+'</td><td>'+esc(o.oper)+'</td></tr>';
+    }).join("");
+
+    var maxD=Math.max.apply(null,DIAS.map(function(x){return x.un;}).concat([1]));
+    document.getElementById("barsDia").innerHTML=DIAS.map(function(x){
+      var lbl=x.dia.slice(8)+"/"+x.dia.slice(5,7);
+      return bar(lbl,x.un,maxD,x.un===0?"var(--slate)":"var(--warn)",x.un===0?"folga":nf(x.un));
+    }).join("");
+
+    var rp={};AP.forEach(function(a){var op=OPS.filter(function(o){return o.num===a.op;})[0];var p=op?op.prod:a.op;rp[p]=rp[p]||{ref:0,tot:0};rp[p].ref+=a.ref;rp[p].tot+=a.prodq;});
+    var arr=Object.keys(rp).map(function(p){return {p:p,pct:rp[p].tot?rp[p].ref/(rp[p].tot+rp[p].ref)*100:0};}).sort(function(a,b){return b.pct-a.pct;}).slice(0,8);
+    var maxR=Math.max.apply(null,arr.map(function(x){return x.pct;}).concat([1]));
+    document.getElementById("barsRefugo").innerHTML=arr.map(function(x){
+      return bar(x.p.replace(/ \d.*/,""),x.pct,maxR,"var(--danger)",x.pct.toFixed(2).replace(".",",")+"%");
+    }).join("");
+  }
+
+  /* ============ RENDER: PCP ============ */
+  function renderPcp(){
+    var q=(document.getElementById("qPcp").value||"").toLowerCase().trim();
+    var fSem=document.getElementById("fPcpSem").value;
+    var fSt=document.getElementById("fPcpStatus").value;
+    var rows=PCP.filter(function(r){
+      var st=pcpStatus(r);
+      if(fSem!==""&&String(r.sem)!==fSem)return false;
+      if(fSt&&st.k!==fSt)return false;
+      if(q){var hay=(r.prod+" "+r.linha).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("pcpCount").textContent=rows.length+" item(ns)";
+    document.getElementById("pcpBody").innerHTML=rows.length?rows.map(function(r){
+      var st=pcpStatus(r);var gap=r.prog-r.dem;
+      var gcls=gap>=0?"":' style="color:var(--danger);font-weight:700"';
+      return '<tr><td class="prod">'+esc(r.prod)+'</td><td><span class="lineTag">'+esc(lineShort(r.linha))+'</span></td>'+
+        '<td>'+esc(SEMANAS[r.sem])+'</td><td class="num">'+nf(r.dem)+'</td><td class="num">'+nf(r.cap)+'</td><td class="num">'+nf(r.prog)+'</td>'+
+        '<td class="num"'+gcls+'>'+(gap>=0?"+":"")+nf(gap)+'</td><td><span class="badge '+st.cls+'">'+st.lab+'</span></td></tr>';
+    }).join(""):emptyRow(8,"Nenhum item no plano","Ajuste os filtros.");
+
+    var totDem=PCP.reduce(function(s,r){return s+r.dem;},0);
+    var totProg=PCP.reduce(function(s,r){return s+r.prog;},0);
+    var gargalos=PCP.filter(function(r){return pcpStatus(r).k==="gargalo";}).length;
+    var atend=totDem?(totProg/totDem*100):0;
+    document.getElementById("kpisPcp").innerHTML=[
+      {lab:"Demanda total",val:nf(totDem),cap:"unidades planejadas",cls:"info"},
+      {lab:"Programado",val:nf(totProg),cap:"unidades alocadas",cls:"violet"},
+      {lab:"Atendimento",val:atend.toFixed(1).replace(".",",")+"%",cap:"programado / demanda",cls:atend>=98?"ok":"warn"},
+      {lab:"Gargalos de capacidade",val:nf(gargalos),cap:"linhas sem capacidade",cls:gargalos>0?"danger":"ok"}
+    ].map(kpiHtml).join("");
+  }
+
+  /* ============ RENDER: MATÉRIA-PRIMA ============ */
+  function renderMp(){
+    var q=(document.getElementById("qMp").value||"").toLowerCase().trim();
+    var fSt=document.getElementById("fMpStatus").value;
+    var rows=MP.filter(function(m){
+      var st=mpStatus(m);
+      if(fSt&&st.k!==fSt)return false;
+      if(q&&m.ins.toLowerCase().indexOf(q)<0)return false;
+      return true;
+    });
+    document.getElementById("mpCount").textContent=rows.length+" insumo(s)";
+    document.getElementById("mpBody").innerHTML=rows.length?rows.map(function(m){
+      var st=mpStatus(m);
+      var cob=m.cons?(m.saldo/m.cons):0;
+      var cobcls=cob<3?' style="color:var(--danger);font-weight:700"':(cob<6?' style="color:var(--warn);font-weight:700"':"");
+      return '<tr><td class="prod">'+esc(m.ins)+'</td><td class="muted">'+esc(m.un)+'</td><td class="num">'+nf(m.saldo)+'</td>'+
+        '<td class="num">'+nf(m.cons)+'</td><td class="num">'+nf(m.nec)+'</td><td class="num"'+cobcls+'>'+cob.toFixed(1).replace(".",",")+' d</td>'+
+        '<td class="num">'+nf(m.min)+'</td><td><span class="badge '+st.cls+'">'+st.lab+'</span></td></tr>';
+    }).join(""):emptyRow(8,"Nenhum insumo","Ajuste os filtros.");
+
+    var itens=MP.length;
+    var abaixo=MP.filter(function(m){return mpStatus(m).k==="baixo";}).length;
+    var valor=MP.reduce(function(s,m){return s+m.saldo*m.custo;},0);
+    document.getElementById("kpisMp").innerHTML=[
+      {lab:"Itens de insumo",val:nf(itens),cap:"em ficha técnica",cls:"info"},
+      {lab:"Abaixo do mínimo",val:nf(abaixo),cap:"exigem compra",cls:abaixo>0?"danger":"ok"},
+      {lab:"Valor em estoque",val:brl(valor),cap:"matéria-prima",cls:"violet"},
+      {lab:"Necessidade p/ OPs",val:brl(MP.reduce(function(s,m){return s+m.nec*m.custo;},0)),cap:"para o plano atual",cls:"warn"}
+    ].map(kpiHtml).join("");
+  }
+
+  /* ============ RENDER: OPs ============ */
+  function renderOps(){
+    var q=(document.getElementById("qOp").value||"").toLowerCase().trim();
+    var fSt=document.getElementById("fOpStatus").value;
+    var fLi=document.getElementById("fOpLinha").value;
+    var rows=OPS.filter(function(o){
+      if(fSt&&o.status!==fSt)return false;
+      if(fLi&&o.linha!==fLi)return false;
+      if(q){var hay=(o.num+" "+o.prod+" "+o.linha).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("opCount").textContent=rows.length+" OP(s)";
+    document.getElementById("opBody").innerHTML=rows.length?rows.map(function(o){
+      var pct=o.plan?Math.round(o.prod_q/o.plan*100):0;
+      return '<tr><td class="mono">'+esc(o.num)+'</td><td class="prod">'+esc(o.prod)+'</td><td><span class="lineTag">'+esc(lineShort(o.linha))+'</span></td>'+
+        '<td class="muted">'+esc(o.filial)+'</td><td class="num">'+nf(o.plan)+'</td><td>'+progress(pct,o.prod_q)+'</td>'+
+        '<td>'+FIG.fmt(o.ini)+'</td><td>'+FIG.fmt(o.fim)+'</td><td><span class="badge '+SCLS[o.status]+'">'+SLAB[o.status]+'</span></td></tr>';
+    }).join(""):emptyRow(9,"Nenhuma OP","Ajuste os filtros ou crie uma nova OP.");
+  }
+
+  /* ============ RENDER: APONTAMENTO ============ */
+  function renderAp(){
+    var q=(document.getElementById("qAp").value||"").toLowerCase().trim();
+    var fLi=document.getElementById("fApLinha").value;
+    var rows=AP.filter(function(a){
+      if(fLi&&a.linha!==fLi)return false;
+      if(q){var hay=(a.op+" "+a.oper+" "+a.linha+" "+a.par).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("apCount").textContent=rows.length+" apontamento(s)";
+    document.getElementById("apBody").innerHTML=rows.length?rows.map(function(a){
+      var parBadge=a.par==="—"?'<span class="muted">—</span>':'<span class="badge '+(a.parmin>=60?"danger":(a.parmin>=30?"warn":"slate"))+'">'+esc(a.par)+'</span>';
+      return '<tr><td class="mono">'+esc(a.op)+'</td><td><span class="lineTag">'+esc(lineShort(a.linha))+'</span></td>'+
+        '<td class="mono">'+esc(a.ini)+'</td><td class="mono">'+esc(a.fim)+'</td><td class="num">'+nf(a.prodq)+'</td>'+
+        '<td class="num" style="color:var(--danger)">'+nf(a.ref)+'</td><td>'+parBadge+'</td><td class="num">'+nf(a.parmin)+'</td><td>'+esc(a.oper)+'</td></tr>';
+    }).join(""):emptyRow(9,"Nenhum apontamento","Ajuste os filtros.");
+  }
+
+  /* ---------------- helpers de markup ---------------- */
+  function kpiHtml(k){return '<div class="kpi '+(k.cls||"")+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}
+  function lineShort(l){return l.replace(/^Linha /,"L").replace(/ - /,"·");}
+  function bar(label,val,max,color,note){
+    var w=Math.round((val/max)*100);if(w<0)w=0;if(w>100)w=100;
+    return '<div class="bar"><span class="bl">'+esc(label)+'</span><span class="bt"><span class="bf" style="width:'+w+'%;background:'+color+'"></span></span><span class="bn">'+note+'</span></div>';
+  }
+  function progress(pct,q){
+    var col=pct>=100?"var(--ok)":(pct>=60?"var(--info)":(pct>=30?"var(--warn)":"var(--danger)"));
+    return '<div class="pg"><span class="pt"><span class="pf" style="width:'+Math.min(100,pct)+'%;background:'+col+'"></span></span><span class="pn">'+pct+'%</span></div><span class="sub">'+nf(q)+' un</span>';
+  }
+  function emptyRow(cols,title,sub){return '<tr><td colspan="'+cols+'"><div class="empty"><b>'+esc(title)+'</b>'+esc(sub)+'</div></td></tr>';}
+
+  /* ---------------- selects dinâmicos ---------------- */
+  function fillSelect(id,arr,label){
+    var el=document.getElementById(id);if(!el)return;
+    el.innerHTML='<option value="">'+esc(label)+'</option>'+arr.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>';}).join("");
+  }
+
+  /* ---------------- wire ---------------- */
+  function wire(){
+    document.getElementById("tabs").addEventListener("click",function(e){var tb=e.target.closest(".tab");if(!tb)return;
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
+      document.querySelectorAll(".view").forEach(function(x){x.classList.remove("active");});
+      tb.classList.add("active");document.getElementById("view-"+tb.getAttribute("data-view")).classList.add("active");});
+
+    ["qPcp","fPcpSem","fPcpStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderPcp);});
+    ["qMp","fMpStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderMp);});
+    ["qOp","fOpStatus","fOpLinha"].forEach(function(i){document.getElementById(i).addEventListener("input",renderOps);});
+    ["qAp","fApLinha"].forEach(function(i){document.getElementById(i).addEventListener("input",renderAp);});
+
+    document.getElementById("btnExpGeral").addEventListener("click",expOps);
+    document.getElementById("btnExpOp").addEventListener("click",expOps);
+    document.getElementById("btnExpMp").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-producao-materiaprima-"+FIG.iso(t)+".csv",["insumo","un","saldo","consumo_dia","necessidade","minimo","status"],
+        MP.map(function(m){return {insumo:m.ins,un:m.un,saldo:m.saldo,consumo_dia:m.cons,necessidade:m.nec,minimo:m.min,status:mpStatus(m).lab};}));FIG.toast("Matéria-prima exportada.");});
+    document.getElementById("btnExpAp").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-producao-apontamentos-"+FIG.iso(t)+".csv",["op","linha","inicio","fim","produzido","refugo","parada","min_parado","operador"],
+        AP.map(function(a){return {op:a.op,linha:a.linha,inicio:a.ini,fim:a.fim,produzido:a.prodq,refugo:a.ref,parada:a.par,min_parado:a.parmin,operador:a.oper};}));FIG.toast("Apontamentos exportados.");});
+
+    document.getElementById("btnNovaOP").addEventListener("click",function(){
+      fillSelect("o_prod",PRODUTOS,"Selecione…");fillSelect("o_linha",LINHAS,"Selecione…");
+      document.getElementById("o_ini").value=FIG.iso(t);document.getElementById("o_num").value="";document.getElementById("o_qtd").value="";document.getElementById("o_fim").value="";
+      FIG.openModal("mdOP");});
+    document.getElementById("btnSaveOP").addEventListener("click",function(){
+      var prod=document.getElementById("o_prod").value;var qtd=document.getElementById("o_qtd").value;
+      if(!prod){alert("Selecione o produto.");return;}
+      if(qtd===""){alert("Informe a quantidade planejada.");return;}
+      var num=document.getElementById("o_num").value.trim()||("OP-"+(24127+OPS.filter(function(o){return o.status!=="concluida";}).length));
+      OPS.unshift({num:num,prod:prod,linha:document.getElementById("o_linha").value||LINHAS[0],filial:document.getElementById("o_filial").value,
+        plan:Number(qtd)||0,prod_q:0,ini:document.getElementById("o_ini").value||FIG.iso(t),fim:document.getElementById("o_fim").value||d(1),status:"planejada",oper:"—"});
+      FIG.closeModal("mdOP");renderOps();renderPainel();FIG.toast("OP "+num+" criada (demo).");});
+  }
+  function expOps(){
+    FIG.downloadCSV("figbor-producao-ops-"+FIG.iso(t)+".csv",["op","produto","linha","filial","planejado","produzido","inicio","prev_fim","status"],
+      OPS.map(function(o){return {op:o.num,produto:o.prod,linha:o.linha,filial:o.filial,planejado:o.plan,produzido:o.prod_q,inicio:o.ini,prev_fim:o.fim,status:SLAB[o.status]};}));
+    FIG.toast("Ordens de produção exportadas.");
+  }
+
+  FIG.requireAuth(function(){
+    FIG.mountChrome({module:"producao"});
+    fillSelect("fOpLinha",LINHAS,"Todas as linhas");
+    fillSelect("fApLinha",LINHAS,"Todas as linhas");
+    var sw=document.getElementById("fPcpSem");sw.innerHTML='<option value="">Todas as semanas</option>'+SEMANAS.map(function(s,i){return '<option value="'+i+'">'+esc(s)+'</option>';}).join("");
+    FIG.wireModals();wire();
+    renderPainel();renderPcp();renderMp();renderOps();renderAp();
+  });
+})();
+</script>
+</body>
+</html>

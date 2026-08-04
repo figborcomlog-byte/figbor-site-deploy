@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A1F44">
+<title>FIGBOR — Comercial &amp; Vendas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="figbor-core.css">
+<style>
+  .tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{border:0;background:transparent;color:var(--page-sub);font:inherit;font-size:13.5px;font-weight:600;padding:8px 13px;border-radius:9px;cursor:pointer}
+  .tab:hover,.tab.active{color:var(--page-fg);background:var(--chip-bg)}
+  .view{display:none}.view.active{display:block}
+  .kpis6{grid-template-columns:repeat(6,1fr)}
+  @media(max-width:1100px){.kpis6{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.kpis6{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:420px){.kpis6{grid-template-columns:1fr}}
+  .rk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;font-weight:800;font-size:12px;background:var(--chip-bg);color:var(--page-sub)}
+  .rk.g1{background:var(--acc);color:#fff}.rk.g2{background:var(--info);color:#fff}.rk.g3{background:var(--violet);color:#fff}
+  .pbar{display:grid;grid-template-columns:1fr 46px;align-items:center;gap:8px;min-width:150px}
+  .pbar .pt{height:10px;background:var(--track);border-radius:6px;overflow:hidden}
+  .pbar .pf{height:100%;border-radius:6px;background:var(--acc)}
+  .pbar .pn{font-size:12px;font-weight:700;text-align:right}
+  tfoot td{padding:12px 14px;border-top:2px solid var(--card-line);font-weight:800;font-size:13px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div id="figChrome"></div>
+
+<main>
+  <div class="wrap">
+    <div class="pagehead"><div class="ht"><h1>Comercial &amp; Vendas</h1><p>Pedidos, força de vendas, comissões, visitas e carteira de clientes — SEMALO Indústria de Alimentos. Período de referência: <b>Julho/2026</b>.</p></div>
+      <div class="ha"><button class="btn primary" id="btnNovoPedido">+ Novo pedido</button></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="painel">Painel</button>
+      <button class="tab" data-view="vendas">Vendas</button>
+      <button class="tab" data-view="vendedores">Vendedores</button>
+      <button class="tab" data-view="comissoes">Comissões</button>
+      <button class="tab" data-view="visitas">Visitas</button>
+      <button class="tab" data-view="clientes">Clientes</button>
+    </div>
+
+    <!-- ============ PAINEL ============ -->
+    <section class="view active" id="view-painel">
+      <div class="kpis kpis6" id="kpisPainel"></div>
+      <div class="grid2 mt16">
+        <div class="card"><div class="ch"><h3>Vendas por vendedor</h3><span class="hint">realizado no mês</span></div>
+          <div class="cb"><div class="bars" id="barsVend"></div></div>
+        </div>
+        <div class="card"><div class="ch"><h3>Faturamento por filial</h3><span class="hint">R$ mil · mês</span></div>
+          <div class="cb"><div class="bars" id="barsFilial"></div></div>
+        </div>
+      </div>
+      <div class="card mt16"><div class="ch"><h3>Top clientes</h3><span class="hint">faturado nos últimos 12 meses</span></div>
+        <div class="cb" style="padding:0 0 6px"><div class="tblwrap" style="border:0;box-shadow:none;border-radius:0">
+          <table><thead><tr><th>#</th><th>Cliente</th><th>Cidade/UF</th><th>Curva</th><th class="num">Pedidos 12m</th><th class="num">Ticket médio</th><th class="num">Faturado 12m</th></tr></thead><tbody id="topClientes"></tbody></table>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ VENDAS ============ -->
+    <section class="view" id="view-vendas">
+      <div class="kpis mt16" id="kpisVendas" style="margin-top:0;margin-bottom:16px"></div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qPed" placeholder="Buscar nº, cliente, vendedor…"></div>
+        <select id="fStatus"><option value="">Todos os status</option><option value="orcamento">Orçamento</option><option value="aberto">Aberto</option><option value="faturado">Faturado</option><option value="cancelado">Cancelado</option></select>
+        <select id="fVend"><option value="">Todos os vendedores</option></select>
+        <button class="btn" id="btnExpPed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="pedCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Vendedor</th><th class="num">Itens</th><th class="num">Valor</th><th>Status</th></tr></thead><tbody id="pedBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ VENDEDORES ============ -->
+    <section class="view" id="view-vendedores">
+      <div class="kpis" id="kpisVend" style="margin-bottom:16px"></div>
+      <div class="tblwrap"><table><thead><tr><th>Ranking</th><th>Vendedor</th><th>Região / Rota</th><th class="num">Meta</th><th class="num">Realizado</th><th>% da meta</th><th class="num">Positivação</th></tr></thead><tbody id="vendBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ COMISSÕES ============ -->
+    <section class="view" id="view-comissoes">
+      <div class="kpis" id="kpisCom" style="margin-bottom:16px"></div>
+      <div class="toolbar">
+        <select id="fComStatus"><option value="">Todas as situações</option><option value="pago">Pago</option><option value="apagar">A pagar</option></select>
+        <button class="btn" id="btnExpCom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="comCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Vendedor</th><th class="num">Base (faturado)</th><th class="num">Regra %</th><th class="num">Comissão</th><th>Período</th><th>Status</th></tr></thead><tbody id="comBody"></tbody>
+        <tfoot><tr><td>Total</td><td class="num" id="comTotBase"></td><td></td><td class="num" id="comTotCom"></td><td colspan="2" class="muted" id="comTotNota"></td></tr></tfoot></table></div>
+    </section>
+
+    <!-- ============ VISITAS ============ -->
+    <section class="view" id="view-visitas">
+      <div class="kpis" id="kpisVis" style="margin-bottom:16px"></div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qVis" placeholder="Buscar vendedor, cliente, cidade…"></div>
+        <select id="fVisStatus"><option value="">Todas</option><option value="agendada">Agendada</option><option value="realizada">Realizada</option><option value="cancelada">Cancelada</option></select>
+        <span class="muted" id="visCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Vendedor</th><th>Cliente</th><th>Cidade</th><th>Data</th><th>Hora</th><th>Status</th><th>Resultado</th></tr></thead><tbody id="visBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ CLIENTES ============ -->
+    <section class="view" id="view-clientes">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qCli" placeholder="Buscar cliente, cidade, vendedor…"></div>
+        <select id="fCurva"><option value="">Todas as curvas</option><option value="A">Curva A</option><option value="B">Curva B</option><option value="C">Curva C</option></select>
+        <button class="btn" id="btnExpCli"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="cliCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Cliente</th><th>Cidade/UF</th><th>Telefone</th><th>Vendedor</th><th>Curva</th><th>Últ. compra</th><th class="num">Faturado 12m</th></tr></thead><tbody id="cliBody"></tbody></table></div>
+    </section>
+
+  </div>
+</main>
+<footer class="fig-foot"><div class="wrap"><b>FIGBOR · Comercial &amp; Vendas</b> — ambiente de demonstração. Dados ilustrativos SEMALO Indústria de Alimentos.</div></footer>
+
+<!-- MODAL pedido (demo) -->
+<div class="overlay" id="mdPed"><div class="modal"><div class="mh"><h3 id="pedTitle">Novo pedido</h3><button class="xbtn" data-close="mdPed">×</button></div>
+  <div class="mb"><div class="formgrid">
+    <div class="field"><label>Nº do pedido</label><input id="p_numero" placeholder="auto"></div>
+    <div class="field"><label>Data</label><input id="p_data" type="date"></div>
+    <div class="field full"><label>Cliente <span class="req">*</span></label><select id="p_cliente"></select></div>
+    <div class="field"><label>Vendedor</label><select id="p_vend"></select></div>
+    <div class="field"><label>Status</label><select id="p_status"><option value="orcamento">Orçamento</option><option value="aberto">Aberto</option><option value="faturado">Faturado</option><option value="cancelado">Cancelado</option></select></div>
+    <div class="field"><label>Qtd de itens</label><input id="p_itens" type="number" min="0" step="1" placeholder="0"></div>
+    <div class="field"><label>Valor total (R$) <span class="req">*</span></label><input id="p_valor" type="number" min="0" step="0.01" placeholder="0,00"></div>
+    <div class="field full"><label>Observação</label><textarea id="p_obs" placeholder="Condições, entrega…"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" data-close="mdPed">Cancelar</button><button class="btn primary" id="btnSavePed">Salvar pedido</button></div>
+</div></div>
+
+<script src="figbor-core.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ============ status maps ============ */
+  var SLAB={orcamento:"Orçamento",aberto:"Aberto",faturado:"Faturado",cancelado:"Cancelado"};
+  var SCLS={orcamento:"slate",aberto:"info",faturado:"ok",cancelado:"danger"};
+
+  /* ============ demo data ============ */
+  var VENDEDORES=[
+    {id:"v1",nome:"Carlos Menezes",regiao:"12-FILIAL PR · Curitiba/Litoral",filial:"PR",meta:820000,realizado:912400,positivacao:87,carteira:64,ativos:58},
+    {id:"v2",nome:"Fernanda Lima",regiao:"10-FILIAL DF · Centro-Oeste",filial:"DF",meta:760000,realizado:698300,positivacao:79,carteira:57,ativos:45},
+    {id:"v3",nome:"Rafael Souza",regiao:"6-FILIAL RS · Serra Gaúcha",filial:"RS",meta:640000,realizado:701150,positivacao:83,carteira:49,ativos:41},
+    {id:"v4",nome:"Juliana Castro",regiao:"2-MS/MTZ · Campo Grande",filial:"MS",meta:590000,realizado:534700,positivacao:74,carteira:52,ativos:38},
+    {id:"v5",nome:"Marcos Oliveira",regiao:"SP · Capital",filial:"SP",meta:910000,realizado:988600,positivacao:91,carteira:71,ativos:65},
+    {id:"v6",nome:"Patrícia Gomes",regiao:"SP · Interior",filial:"SP",meta:680000,realizado:642900,positivacao:81,carteira:55,ativos:44},
+    {id:"v7",nome:"Bruno Almeida",regiao:"12-FILIAL PR · Norte Pioneiro",filial:"PR",meta:520000,realizado:487200,positivacao:76,carteira:43,ativos:33},
+    {id:"v8",nome:"Aline Ribeiro",regiao:"10-FILIAL DF · Entorno/GO",filial:"DF",meta:470000,realizado:512800,positivacao:85,carteira:39,ativos:34}
+  ];
+  function vendById(id){for(var i=0;i<VENDEDORES.length;i++)if(VENDEDORES[i].id===id)return VENDEDORES[i];return null;}
+  function vNome(id){var v=vendById(id);return v?v.nome:"—";}
+
+  var CLIENTES=[
+    {id:"c1",nome:"Mercado Central Ltda",cidade:"São Paulo",uf:"SP",tel:"(11) 3221-9080",vend:"v5",curva:"A",ult:"2026-07-28",fat12:1284500},
+    {id:"c2",nome:"Distribuidora Sul Alimentos",cidade:"Curitiba",uf:"PR",tel:"(41) 3312-4477",vend:"v1",curva:"A",ult:"2026-07-27",fat12:1096300},
+    {id:"c3",nome:"Atacado Serra S/A",cidade:"Caxias do Sul",uf:"RS",tel:"(54) 3218-6620",vend:"v3",curva:"A",ult:"2026-07-25",fat12:874200},
+    {id:"c4",nome:"Rede Pantanal Supermercados",cidade:"Campo Grande",uf:"MS",tel:"(67) 3025-1190",vend:"v4",curva:"A",ult:"2026-07-29",fat12:812750},
+    {id:"c5",nome:"Comercial Planalto",cidade:"Brasília",uf:"DF",tel:"(61) 3340-7788",vend:"v2",curva:"A",ult:"2026-07-24",fat12:768900},
+    {id:"c6",nome:"Supermercados Boa Praça",cidade:"Campinas",uf:"SP",tel:"(19) 3255-3021",vend:"v6",curva:"B",ult:"2026-07-22",fat12:534100},
+    {id:"c7",nome:"Empório Norte Pioneiro",cidade:"Londrina",uf:"PR",tel:"(43) 3325-8890",vend:"v7",curva:"B",ult:"2026-07-20",fat12:421600},
+    {id:"c8",nome:"Distribuidora Entorno GO",cidade:"Goiânia",uf:"GO",tel:"(62) 3211-4455",vend:"v8",curva:"B",ult:"2026-07-26",fat12:398400},
+    {id:"c9",nome:"Mercadinho Bela Vista",cidade:"Porto Alegre",uf:"RS",tel:"(51) 3019-2277",vend:"v3",curva:"B",ult:"2026-07-18",fat12:287300},
+    {id:"c10",nome:"Atacadista Vale do Sol",cidade:"Ribeirão Preto",uf:"SP",tel:"(16) 3610-9902",vend:"v6",curva:"B",ult:"2026-07-15",fat12:263900},
+    {id:"c11",nome:"Comercial Três Lagoas",cidade:"Três Lagoas",uf:"MS",tel:"(67) 3521-0044",vend:"v4",curva:"C",ult:"2026-07-11",fat12:148200},
+    {id:"c12",nome:"Mercado do Bairro",cidade:"Foz do Iguaçu",uf:"PR",tel:"(45) 3027-6611",vend:"v1",curva:"C",ult:"2026-07-09",fat12:121700},
+    {id:"c13",nome:"Empório Cerrado",cidade:"Taguatinga",uf:"DF",tel:"(61) 3562-1120",vend:"v2",curva:"C",ult:"2026-06-30",fat12:98600},
+    {id:"c14",nome:"Mini Mercado Aurora",cidade:"Pelotas",uf:"RS",tel:"(53) 3028-4410",vend:"v3",curva:"C",ult:"2026-06-27",fat12:72400},
+    {id:"c15",nome:"Comercial Litoral Norte",cidade:"Santos",uf:"SP",tel:"(13) 3201-7788",vend:"v5",curva:"C",ult:"2026-07-02",fat12:64300}
+  ];
+  function cliById(id){for(var i=0;i<CLIENTES.length;i++)if(CLIENTES[i].id===id)return CLIENTES[i];return null;}
+  function cNome(id){var c=cliById(id);return c?c.nome:"—";}
+
+  var PEDIDOS=[
+    {numero:"20481",data:"2026-07-29",cli:"c4",vend:"v4",itens:22,valor:38420.50,status:"faturado"},
+    {numero:"20480",data:"2026-07-29",cli:"c1",vend:"v5",itens:31,valor:54180.00,status:"faturado"},
+    {numero:"20479",data:"2026-07-28",cli:"c2",vend:"v1",itens:18,valor:29750.75,status:"faturado"},
+    {numero:"20478",data:"2026-07-28",cli:"c5",vend:"v2",itens:14,valor:21360.00,status:"aberto"},
+    {numero:"20477",data:"2026-07-27",cli:"c3",vend:"v3",itens:26,valor:44210.30,status:"faturado"},
+    {numero:"20476",data:"2026-07-27",cli:"c6",vend:"v6",itens:9,valor:12980.00,status:"aberto"},
+    {numero:"20475",data:"2026-07-26",cli:"c8",vend:"v8",itens:12,valor:17640.90,status:"faturado"},
+    {numero:"20474",data:"2026-07-26",cli:"c7",vend:"v7",itens:7,valor:9310.00,status:"orcamento"},
+    {numero:"20473",data:"2026-07-25",cli:"c1",vend:"v5",itens:28,valor:47820.00,status:"faturado"},
+    {numero:"20472",data:"2026-07-25",cli:"c9",vend:"v3",itens:6,valor:7890.50,status:"cancelado"},
+    {numero:"20471",data:"2026-07-24",cli:"c10",vend:"v6",itens:15,valor:19470.00,status:"faturado"},
+    {numero:"20470",data:"2026-07-24",cli:"c11",vend:"v4",itens:5,valor:6120.00,status:"orcamento"},
+    {numero:"20469",data:"2026-07-23",cli:"c2",vend:"v1",itens:20,valor:33150.40,status:"faturado"},
+    {numero:"20468",data:"2026-07-23",cli:"c12",vend:"v1",itens:8,valor:9740.00,status:"aberto"},
+    {numero:"20467",data:"2026-07-22",cli:"c13",vend:"v2",itens:4,valor:4980.00,status:"cancelado"},
+    {numero:"20466",data:"2026-07-22",cli:"c3",vend:"v3",itens:24,valor:39860.00,status:"faturado"},
+    {numero:"20465",data:"2026-07-21",cli:"c15",vend:"v5",itens:6,valor:7420.00,status:"orcamento"},
+    {numero:"20464",data:"2026-07-21",cli:"c5",vend:"v2",itens:17,valor:26310.00,status:"faturado"}
+  ];
+
+  var VISITAS=[
+    {vend:"v5",cli:"c1",cidade:"São Paulo/SP",data:"2026-07-30",hora:"08:30",status:"realizada",res:"pedido"},
+    {vend:"v1",cli:"c2",cidade:"Curitiba/PR",data:"2026-07-30",hora:"09:15",status:"realizada",res:"pedido"},
+    {vend:"v4",cli:"c4",cidade:"Campo Grande/MS",data:"2026-07-30",hora:"10:00",status:"realizada",res:"pedido"},
+    {vend:"v2",cli:"c5",cidade:"Brasília/DF",data:"2026-07-30",hora:"11:00",status:"agendada",res:"—"},
+    {vend:"v3",cli:"c3",cidade:"Caxias do Sul/RS",data:"2026-07-30",hora:"13:30",status:"realizada",res:"sem pedido"},
+    {vend:"v6",cli:"c6",cidade:"Campinas/SP",data:"2026-07-30",hora:"14:00",status:"agendada",res:"—"},
+    {vend:"v7",cli:"c7",cidade:"Londrina/PR",data:"2026-07-30",hora:"15:00",status:"cancelada",res:"—"},
+    {vend:"v8",cli:"c8",cidade:"Goiânia/GO",data:"2026-07-30",hora:"15:45",status:"realizada",res:"pedido"},
+    {vend:"v5",cli:"c15",cidade:"Santos/SP",data:"2026-07-30",hora:"16:30",status:"agendada",res:"—"},
+    {vend:"v4",cli:"c11",cidade:"Três Lagoas/MS",data:"2026-07-30",hora:"17:00",status:"realizada",res:"sem pedido"},
+    {vend:"v1",cli:"c12",cidade:"Foz do Iguaçu/PR",data:"2026-07-30",hora:"09:40",status:"realizada",res:"pedido"},
+    {vend:"v3",cli:"c9",cidade:"Porto Alegre/RS",data:"2026-07-30",hora:"11:30",status:"cancelada",res:"—"},
+    {vend:"v2",cli:"c13",cidade:"Taguatinga/DF",data:"2026-07-30",hora:"14:20",status:"agendada",res:"—"},
+    {vend:"v6",cli:"c10",cidade:"Ribeirão Preto/SP",data:"2026-07-30",hora:"08:50",status:"realizada",res:"pedido"}
+  ];
+
+  var COMISSOES=[
+    {vend:"v5",base:988600,regra:2.5,periodo:"Julho/2026",status:"apagar"},
+    {vend:"v1",base:912400,regra:2.5,periodo:"Julho/2026",status:"apagar"},
+    {vend:"v3",base:701150,regra:2.2,periodo:"Julho/2026",status:"apagar"},
+    {vend:"v2",base:698300,regra:2.2,periodo:"Julho/2026",status:"pago"},
+    {vend:"v6",base:642900,regra:2.0,periodo:"Julho/2026",status:"pago"},
+    {vend:"v4",base:534700,regra:2.0,periodo:"Julho/2026",status:"apagar"},
+    {vend:"v8",base:512800,regra:2.0,periodo:"Julho/2026",status:"pago"},
+    {vend:"v7",base:487200,regra:1.8,periodo:"Julho/2026",status:"apagar"}
+  ];
+
+  /* ============ helpers ============ */
+  function badge(cls,txt){return '<span class="badge '+cls+'">'+txt+'</span>';}
+  function curvaBadge(c){var m={A:"ok",B:"info",C:"slate"};return badge(m[c]||"slate","Curva "+c);}
+  function pctBar(pct){var w=Math.max(2,Math.min(100,Math.round(pct)));var col=pct>=100?"var(--ok)":(pct>=85?"var(--acc)":(pct>=70?"var(--warn)":"var(--danger)"));
+    return '<div class="pbar"><span class="pt"><span class="pf" style="width:'+w+'%;background:'+col+'"></span></span><span class="pn">'+Math.round(pct)+'%</span></div>';}
+
+  /* ============ PAINEL ============ */
+  function renderPainel(){
+    var metaTot=0,realTot=0,posTot=0;VENDEDORES.forEach(function(v){metaTot+=v.meta;realTot+=v.realizado;posTot+=v.positivacao;});
+    var posMed=Math.round(posTot/VENDEDORES.length);
+    var fatMes=PEDIDOS.filter(function(p){return p.status==="faturado";});
+    var totFatMes=fatMes.reduce(function(s,p){return s+p.valor;},0);
+    var nped=PEDIDOS.length;
+    var ticket=fatMes.length?totFatMes/fatMes.length:0;
+    var pctMeta=metaTot?realTot/metaTot*100:0;
+    var kpis=[
+      {lab:"Faturamento do mês",val:FIG.brl(realTot),cap:"realizado · força de vendas",cls:"ok"},
+      {lab:"Meta do mês",val:FIG.brl(metaTot),cap:"objetivo consolidado",cls:"info"},
+      {lab:"% da meta",val:Math.round(pctMeta)+"%",cap:(realTot-metaTot>=0?"+":"")+FIG.brl(realTot-metaTot)+" vs meta",cls:pctMeta>=100?"ok":"warn"},
+      {lab:"Ticket médio",val:FIG.brl(ticket),cap:fatMes.length+" pedidos faturados",cls:"violet"},
+      {lab:"Nº de pedidos",val:FIG.nf(nped),cap:PEDIDOS.filter(function(p){return p.status==="aberto";}).length+" em aberto",cls:""},
+      {lab:"Positivação",val:posMed+"%",cap:"média das rotas",cls:posMed>=85?"ok":"warn"}
+    ];
+    document.getElementById("kpisPainel").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+
+    var vs=VENDEDORES.slice().sort(function(a,b){return b.realizado-a.realizado;});
+    var maxV=vs[0].realizado;
+    document.getElementById("barsVend").innerHTML=vs.map(function(v){
+      return '<div class="bar"><span class="bl">'+FIG.esc(v.nome)+'</span><span class="bt"><span class="bf" style="width:'+Math.round(v.realizado/maxV*100)+'%"></span></span><span class="bn">'+FIG.brl(v.realizado)+'</span></div>';
+    }).join("");
+
+    var byFil={};VENDEDORES.forEach(function(v){byFil[v.filial]=(byFil[v.filial]||0)+v.realizado;});
+    var filArr=Object.keys(byFil).map(function(k){return {f:k,v:byFil[k]};}).sort(function(a,b){return b.v-a.v;});
+    var maxF=filArr[0].v;var filName={PR:"12-FILIAL PR",DF:"10-FILIAL DF",RS:"6-FILIAL RS",MS:"2-MS/MTZ",SP:"SP"};
+    document.getElementById("barsFilial").innerHTML=filArr.map(function(x){
+      return '<div class="bar"><span class="bl">'+(filName[x.f]||x.f)+'</span><span class="bt"><span class="bf" style="width:'+Math.round(x.v/maxF*100)+'%;background:var(--info)"></span></span><span class="bn">'+FIG.nf(Math.round(x.v/1000))+'</span></div>';
+    }).join("");
+
+    var top=CLIENTES.slice().sort(function(a,b){return b.fat12-a.fat12;}).slice(0,8);
+    document.getElementById("topClientes").innerHTML=top.map(function(c,i){
+      var pedCount=Math.round(c.fat12/ (18000+ (i*900)) );
+      var tk=c.fat12/Math.max(1,pedCount);
+      return '<tr><td><span class="rk '+(i<3?"g"+(i+1):"")+'">'+(i+1)+'</span></td><td class="prod">'+FIG.esc(c.nome)+'</td><td>'+FIG.esc(c.cidade+"/"+c.uf)+'</td><td>'+curvaBadge(c.curva)+'</td><td class="num">'+FIG.nf(pedCount)+'</td><td class="num">'+FIG.brl(tk)+'</td><td class="num">'+FIG.brl(c.fat12)+'</td></tr>';
+    }).join("");
+  }
+
+  /* ============ VENDAS ============ */
+  function renderVendasKpis(){
+    var fat=PEDIDOS.filter(function(p){return p.status==="faturado";});
+    var totFat=fat.reduce(function(s,p){return s+p.valor;},0);
+    var abertos=PEDIDOS.filter(function(p){return p.status==="aberto";});
+    var totAb=abertos.reduce(function(s,p){return s+p.valor;},0);
+    var orc=PEDIDOS.filter(function(p){return p.status==="orcamento";}).length;
+    var kpis=[
+      {lab:"Pedidos faturados",val:FIG.nf(fat.length),cap:FIG.brl(totFat),cls:"ok"},
+      {lab:"Em aberto",val:FIG.nf(abertos.length),cap:FIG.brl(totAb),cls:"info"},
+      {lab:"Orçamentos",val:FIG.nf(orc),cap:"aguardando conversão",cls:"warn"},
+      {lab:"Total no período",val:FIG.nf(PEDIDOS.length),cap:"pedidos registrados",cls:"violet"}
+    ];
+    document.getElementById("kpisVendas").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+  }
+  function renderPedidos(){
+    var q=(document.getElementById("qPed").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fStatus").value;
+    var fv=document.getElementById("fVend").value;
+    var rows=PEDIDOS.slice().sort(function(a,b){return b.numero.localeCompare(a.numero);}).filter(function(p){
+      if(fs&&p.status!==fs)return false;
+      if(fv&&p.vend!==fv)return false;
+      if(q){var hay=(p.numero+" "+cNome(p.cli)+" "+vNome(p.vend)).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("pedCount").textContent=rows.length+" pedido(s)";
+    document.getElementById("pedBody").innerHTML=rows.length?rows.map(function(p){
+      return '<tr><td class="mono">'+FIG.esc(p.numero)+'</td><td>'+FIG.fmt(p.data)+'</td><td class="prod">'+FIG.esc(cNome(p.cli))+'</td><td>'+FIG.esc(vNome(p.vend))+'</td>'+
+        '<td class="num">'+FIG.nf(p.itens)+'</td><td class="num">'+FIG.brl(p.valor)+'</td><td>'+badge(SCLS[p.status],SLAB[p.status])+'</td></tr>';
+    }).join(""):'<tr><td colspan="7"><div class="empty"><b>Nenhum pedido</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ============ VENDEDORES ============ */
+  function renderVendedores(){
+    var metaTot=0,realTot=0;VENDEDORES.forEach(function(v){metaTot+=v.meta;realTot+=v.realizado;});
+    var pct=metaTot?realTot/metaTot*100:0;
+    var kpis=[
+      {lab:"Vendedores ativos",val:FIG.nf(VENDEDORES.length),cap:"em campo · 5 filiais",cls:"info"},
+      {lab:"Meta total",val:FIG.brl(metaTot),cap:"Julho/2026",cls:"violet"},
+      {lab:"Realizado",val:FIG.brl(realTot),cap:(realTot>=metaTot?"acima da meta":"abaixo da meta"),cls:realTot>=metaTot?"ok":"warn"},
+      {lab:"% da meta",val:Math.round(pct)+"%",cap:VENDEDORES.filter(function(v){return v.realizado>=v.meta;}).length+" de "+VENDEDORES.length+" bateram",cls:pct>=100?"ok":"warn"}
+    ];
+    document.getElementById("kpisVend").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+    var vs=VENDEDORES.slice().sort(function(a,b){return b.realizado-a.realizado;});
+    document.getElementById("vendBody").innerHTML=vs.map(function(v,i){
+      var pct=v.realizado/v.meta*100;
+      return '<tr><td><span class="rk '+(i<3?"g"+(i+1):"")+'">'+(i+1)+'</span></td><td class="prod">'+FIG.esc(v.nome)+'</td><td>'+FIG.esc(v.regiao)+'</td>'+
+        '<td class="num">'+FIG.brl(v.meta)+'</td><td class="num">'+FIG.brl(v.realizado)+'</td><td>'+pctBar(pct)+'</td><td class="num">'+v.positivacao+'% ('+v.ativos+'/'+v.carteira+')</td></tr>';
+    }).join("");
+  }
+
+  /* ============ COMISSÕES ============ */
+  function renderComissoes(){
+    var fst=document.getElementById("fComStatus").value;
+    var rows=COMISSOES.slice().sort(function(a,b){return b.base-a.base;}).filter(function(c){return !fst||c.status===fst;});
+    var totBase=0,totCom=0,totBaseAll=0,totComAll=0,apagar=0;
+    COMISSOES.forEach(function(c){var com=c.base*c.regra/100;totBaseAll+=c.base;totComAll+=com;if(c.status==="apagar")apagar+=com;});
+    var kpis=[
+      {lab:"Comissão total",val:FIG.brl(totComAll),cap:"Julho/2026",cls:"violet"},
+      {lab:"A pagar",val:FIG.brl(apagar),cap:COMISSOES.filter(function(c){return c.status==="apagar";}).length+" vendedores",cls:"warn"},
+      {lab:"Pago",val:FIG.brl(totComAll-apagar),cap:COMISSOES.filter(function(c){return c.status==="pago";}).length+" vendedores",cls:"ok"},
+      {lab:"Base faturada",val:FIG.brl(totBaseAll),cap:"soma das bases",cls:"info"}
+    ];
+    document.getElementById("kpisCom").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+    document.getElementById("comCount").textContent=rows.length+" lançamento(s)";
+    document.getElementById("comBody").innerHTML=rows.map(function(c){
+      var com=c.base*c.regra/100;totBase+=c.base;totCom+=com;
+      return '<tr><td class="prod">'+FIG.esc(vNome(c.vend))+'</td><td class="num">'+FIG.brl(c.base)+'</td><td class="num">'+FIG.nf2(c.regra)+'%</td><td class="num">'+FIG.brl(com)+'</td><td>'+FIG.esc(c.periodo)+'</td><td>'+(c.status==="pago"?badge("ok","Pago"):badge("warn","A pagar"))+'</td></tr>';
+    }).join("");
+    document.getElementById("comTotBase").textContent=FIG.brl(totBase);
+    document.getElementById("comTotCom").textContent=FIG.brl(totCom);
+    document.getElementById("comTotNota").textContent=rows.length+" vendedor(es) no filtro";
+  }
+
+  /* ============ VISITAS ============ */
+  function renderVisitas(){
+    var hoje=VISITAS.length;
+    var real=VISITAS.filter(function(v){return v.status==="realizada";});
+    var comPed=real.filter(function(v){return v.res==="pedido";}).length;
+    var conv=real.length?Math.round(comPed/real.length*100):0;
+    var kpis=[
+      {lab:"Visitas hoje",val:FIG.nf(hoje),cap:"agenda 30/07/2026",cls:"info"},
+      {lab:"Realizadas",val:FIG.nf(real.length),cap:VISITAS.filter(function(v){return v.status==="agendada";}).length+" pendentes",cls:"ok"},
+      {lab:"Com pedido",val:FIG.nf(comPed),cap:"visitas convertidas",cls:"violet"},
+      {lab:"Taxa de conversão",val:conv+"%",cap:"pedido / realizada",cls:conv>=50?"ok":"warn"}
+    ];
+    document.getElementById("kpisVis").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+    var q=(document.getElementById("qVis").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fVisStatus").value;
+    var vcls={agendada:"info",realizada:"ok",cancelada:"danger"};var vlab={agendada:"Agendada",realizada:"Realizada",cancelada:"Cancelada"};
+    var rows=VISITAS.filter(function(v){
+      if(fs&&v.status!==fs)return false;
+      if(q){var hay=(vNome(v.vend)+" "+cNome(v.cli)+" "+v.cidade).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("visCount").textContent=rows.length+" visita(s)";
+    document.getElementById("visBody").innerHTML=rows.length?rows.map(function(v){
+      var resCell=v.res==="pedido"?'<span class="tag" style="color:var(--ok)"><span class="dot" style="background:var(--ok)"></span>Pedido</span>':(v.res==="sem pedido"?'<span class="tag">Sem pedido</span>':'<span class="muted">—</span>');
+      return '<tr><td class="prod">'+FIG.esc(vNome(v.vend))+'</td><td>'+FIG.esc(cNome(v.cli))+'</td><td>'+FIG.esc(v.cidade)+'</td><td>'+FIG.fmt(v.data)+'</td><td class="mono">'+FIG.esc(v.hora)+'</td><td>'+badge(vcls[v.status],vlab[v.status])+'</td><td>'+resCell+'</td></tr>';
+    }).join(""):'<tr><td colspan="7"><div class="empty"><b>Nenhuma visita</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ============ CLIENTES ============ */
+  function renderClientes(){
+    var q=(document.getElementById("qCli").value||"").toLowerCase().trim();
+    var fc=document.getElementById("fCurva").value;
+    var rows=CLIENTES.slice().sort(function(a,b){return b.fat12-a.fat12;}).filter(function(c){
+      if(fc&&c.curva!==fc)return false;
+      if(q){var hay=(c.nome+" "+c.cidade+" "+c.uf+" "+vNome(c.vend)).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("cliCount").textContent=rows.length+" cliente(s)";
+    document.getElementById("cliBody").innerHTML=rows.length?rows.map(function(c){
+      return '<tr><td class="prod">'+FIG.esc(c.nome)+'</td><td>'+FIG.esc(c.cidade+"/"+c.uf)+'</td><td class="mono">'+FIG.esc(c.tel)+'</td><td>'+FIG.esc(vNome(c.vend))+'</td><td>'+curvaBadge(c.curva)+'</td><td>'+FIG.fmt(c.ult)+'</td><td class="num">'+FIG.brl(c.fat12)+'</td></tr>';
+    }).join(""):'<tr><td colspan="7"><div class="empty"><b>Nenhum cliente</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ============ modal pedido (demo) ============ */
+  function fillSelects(){
+    var sc=document.getElementById("p_cliente");
+    sc.innerHTML='<option value="">Selecione…</option>'+CLIENTES.slice().sort(function(a,b){return a.nome.localeCompare(b.nome);}).map(function(c){return '<option value="'+c.id+'">'+FIG.esc(c.nome)+'</option>';}).join("");
+    var sv=document.getElementById("p_vend");
+    sv.innerHTML='<option value="">Selecione…</option>'+VENDEDORES.map(function(v){return '<option value="'+v.id+'">'+FIG.esc(v.nome)+'</option>';}).join("");
+    var fv=document.getElementById("fVend");
+    fv.innerHTML='<option value="">Todos os vendedores</option>'+VENDEDORES.map(function(v){return '<option value="'+v.id+'">'+FIG.esc(v.nome)+'</option>';}).join("");
+  }
+  function openPed(){
+    document.getElementById("p_numero").value="";document.getElementById("p_data").value="2026-07-30";
+    document.getElementById("p_cliente").value="";document.getElementById("p_vend").value="";document.getElementById("p_status").value="aberto";
+    document.getElementById("p_itens").value="";document.getElementById("p_valor").value="";document.getElementById("p_obs").value="";
+    FIG.openModal("mdPed");
+  }
+  function savePed(){
+    var cli=document.getElementById("p_cliente").value;var valor=document.getElementById("p_valor").value;
+    if(!cli){alert("Selecione o cliente.");return;}
+    if(valor===""){alert("Informe o valor.");return;}
+    var num=document.getElementById("p_numero").value.trim();
+    if(!num){var mx=20481;PEDIDOS.forEach(function(p){var n=parseInt(p.numero,10);if(n>mx)mx=n;});num=String(mx+1);}
+    PEDIDOS.push({numero:num,data:document.getElementById("p_data").value||"2026-07-30",cli:cli,vend:document.getElementById("p_vend").value||"v5",
+      itens:Number(document.getElementById("p_itens").value)||0,valor:Number(valor)||0,status:document.getElementById("p_status").value});
+    FIG.closeModal("mdPed");renderPedidos();renderVendasKpis();renderPainel();FIG.toast("Pedido registrado (demo).");
+  }
+
+  /* ============ wiring ============ */
+  function wire(){
+    document.getElementById("tabs").addEventListener("click",function(e){var t=e.target.closest(".tab");if(!t)return;
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
+      document.querySelectorAll(".view").forEach(function(x){x.classList.remove("active");});
+      t.classList.add("active");document.getElementById("view-"+t.getAttribute("data-view")).classList.add("active");});
+    ["qPed","fStatus","fVend"].forEach(function(i){document.getElementById(i).addEventListener("input",renderPedidos);});
+    document.getElementById("fComStatus").addEventListener("input",renderComissoes);
+    ["qVis","fVisStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderVisitas);});
+    ["qCli","fCurva"].forEach(function(i){document.getElementById(i).addEventListener("input",renderClientes);});
+    document.getElementById("btnNovoPedido").addEventListener("click",openPed);
+    document.getElementById("btnSavePed").addEventListener("click",savePed);
+    document.getElementById("btnExpPed").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-vendas-pedidos-2026-07-30.csv",["numero","data","cliente","vendedor","itens","valor","status"],
+        PEDIDOS.map(function(p){return {numero:p.numero,data:p.data,cliente:cNome(p.cli),vendedor:vNome(p.vend),itens:p.itens,valor:p.valor,status:SLAB[p.status]};}));FIG.toast("Pedidos exportados.");});
+    document.getElementById("btnExpCom").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-vendas-comissoes-2026-07-30.csv",["vendedor","base","regra","comissao","periodo","status"],
+        COMISSOES.map(function(c){return {vendedor:vNome(c.vend),base:c.base,regra:c.regra,comissao:(c.base*c.regra/100).toFixed(2),periodo:c.periodo,status:c.status==="pago"?"Pago":"A pagar"};}));FIG.toast("Comissões exportadas.");});
+    document.getElementById("btnExpCli").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-vendas-clientes-2026-07-30.csv",["cliente","cidade","uf","telefone","vendedor","curva","ult_compra","faturado_12m"],
+        CLIENTES.map(function(c){return {cliente:c.nome,cidade:c.cidade,uf:c.uf,telefone:c.tel,vendedor:vNome(c.vend),curva:c.curva,ult_compra:c.ult,faturado_12m:c.fat12};}));FIG.toast("Clientes exportados.");});
+  }
+
+  FIG.requireAuth(function(){
+    FIG.mountChrome({module:"comercial"});
+    fillSelects();
+    renderPainel();renderVendasKpis();renderPedidos();renderVendedores();renderComissoes();renderVisitas();renderClientes();
+    FIG.wireModals();wire();
+  });
+})();
+</script>
+</body>
+</html>

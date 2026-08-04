@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A1F44">
+<title>FIGBOR — Logística & Transporte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="figbor-core.css">
+<style>
+  .tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{border:0;background:transparent;color:var(--page-sub);font:inherit;font-size:13.5px;font-weight:600;padding:8px 13px;border-radius:9px;cursor:pointer}
+  .tab:hover,.tab.active{color:var(--page-fg);background:var(--chip-bg)}
+  .view{display:none}.view.active{display:block}
+  .clk{cursor:pointer}
+  .miniprog{display:flex;align-items:center;gap:8px;min-width:150px}
+  .miniprog .bt{flex:1;height:9px;background:var(--track);border-radius:6px;overflow:hidden}
+  .miniprog .bf{height:100%;border-radius:6px;background:var(--acc)}
+  .miniprog .lb{font-size:11.5px;font-weight:700;color:var(--page-sub);white-space:nowrap;min-width:38px;text-align:right}
+  .arw{color:var(--page-sub);margin:0 4px}
+  .stopseq{display:flex;flex-direction:column;gap:0;margin-top:4px}
+  .stopseq .stp{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--card-line)}
+  .stopseq .stp:last-child{border-bottom:0}
+  .stopseq .ord{width:24px;height:24px;border-radius:50%;background:var(--chip-bg);color:var(--page-fg);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;border:1px solid var(--card-line)}
+  .stopseq .stp.done .ord{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .stopseq .stp.cur .ord{background:var(--acc);color:#fff;border-color:var(--acc)}
+  .stopseq .cn{font-weight:600;font-size:13.5px}
+  .stopseq .cc{font-size:12px;color:var(--page-sub)}
+  .stopseq .jw{font-size:12px;color:var(--page-sub);font-variant-numeric:tabular-nums}
+  .mapbox{background:var(--chip-bg);border:1px solid var(--card-line);border-radius:12px;padding:8px;margin-bottom:16px}
+  .mapbox svg{display:block;width:100%;height:auto}
+  .modal.wide{max-width:720px}
+  .legdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div id="figChrome"></div>
+
+<main>
+  <div class="wrap">
+    <div class="pagehead"><div class="ht"><h1>Logística &amp; Transporte</h1><p>Cargas, fretes, roteirização, motoristas e entregas em tempo real. Ambiente de demonstração SEMALO Alimentos.</p></div>
+      <div class="ha"><button class="btn" id="btnExpGeral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar cargas</span></button></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="painel">Painel</button>
+      <button class="tab" data-view="roteirizacao">Roteirização</button>
+      <button class="tab" data-view="motoristas">Motoristas</button>
+      <button class="tab" data-view="cargas">Cargas</button>
+      <button class="tab" data-view="entregas">Entregas</button>
+    </div>
+
+    <!-- PAINEL -->
+    <section class="view active" id="view-painel">
+      <div class="kpis" id="kpis"></div>
+      <div class="kpis mt16" id="kpis2"></div>
+      <div class="grid2 mt16">
+        <div class="card"><div class="ch"><h3>Entregas por status</h3><span class="hint">hoje</span></div><div class="cb"><div class="bars" id="barsStatus"></div></div></div>
+        <div class="card"><div class="ch"><h3>Frete por filial</h3><span class="hint">mês corrente</span></div><div class="cb"><div class="bars" id="barsFilial"></div></div></div>
+      </div>
+      <div class="card mt16"><div class="ch"><h3>Em rota agora</h3><span class="hint" id="emRotaHint"></span></div>
+        <div class="cb" style="padding:0 0 6px"><div class="tblwrap" style="border:0;box-shadow:none;border-radius:0">
+          <table><thead><tr><th>Rota</th><th>Motorista</th><th>Veículo</th><th>Destino atual</th><th class="num">Progresso</th><th>Previsão</th><th>Status</th></tr></thead><tbody id="emRotaBody"></tbody></table>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ROTEIRIZACAO -->
+    <section class="view" id="view-roteirizacao">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qRota" placeholder="Buscar rota, motorista, placa…"></div>
+        <select id="fRotaStatus"><option value="">Todos os status</option><option value="em_rota">Em rota</option><option value="planejada">Planejada</option><option value="finalizada">Finalizada</option><option value="atrasada">Atrasada</option></select>
+        <span class="muted" id="rotaCount" style="font-size:12.5px"></span>
+      </div>
+      <p class="muted" style="font-size:12.5px;margin:-4px 0 12px">Clique em uma rota para ver a sequência de paradas e o mapa esquemático.</p>
+      <div class="tblwrap"><table><thead><tr><th>Rota</th><th>Motorista</th><th>Veículo</th><th class="num">Paradas</th><th class="num">KM</th><th>Saída</th><th>Previsão</th><th>Status</th></tr></thead><tbody id="rotaBody"></tbody></table></div>
+    </section>
+
+    <!-- MOTORISTAS -->
+    <section class="view" id="view-motoristas">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qMot" placeholder="Buscar motorista, cidade…"></div>
+        <select id="fMotStatus"><option value="">Todos</option><option value="em_rota">Em rota</option><option value="parado">Parado</option><option value="finalizado">Finalizado</option></select>
+        <span class="muted" id="motCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Motorista</th><th>Veículo</th><th>Status</th><th class="num">Entregas do dia</th><th>Última posição</th><th>Hora</th><th>Rota atual</th></tr></thead><tbody id="motBody"></tbody></table></div>
+    </section>
+
+    <!-- CARGAS -->
+    <section class="view" id="view-cargas">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qCarga" placeholder="Buscar nº, destino, motorista…"></div>
+        <select id="fCargaStatus"><option value="">Todos os status</option><option value="carregando">Carregando</option><option value="em_transito">Em trânsito</option><option value="entregue">Entregue</option><option value="atrasada">Atrasada</option><option value="cancelada">Cancelada</option></select>
+        <button class="btn" id="btnExpCarga"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="cargaCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Nº</th><th>Origem → Destino</th><th>Motorista</th><th>Veículo</th><th>Saída</th><th>Prev.</th><th class="num">Custo</th><th>Status</th></tr></thead><tbody id="cargaBody"></tbody></table></div>
+    </section>
+
+    <!-- ENTREGAS -->
+    <section class="view" id="view-entregas">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qEnt" placeholder="Buscar pedido, cliente, cidade…"></div>
+        <select id="fEntStatus"><option value="">Todos os status</option><option value="a_caminho">A caminho</option><option value="entregue">Entregue</option><option value="falha">Falha</option></select>
+        <button class="btn" id="btnExpEnt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="entCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Endereço / Cidade</th><th>Janela</th><th>Motorista</th><th>Status</th><th>Comprovante</th></tr></thead><tbody id="entBody"></tbody></table></div>
+    </section>
+  </div>
+</main>
+<footer class="fig-foot"><div class="wrap"><b>FIGBOR · Logística &amp; Transporte</b> — ambiente de demonstração, dados locais neste navegador.</div></footer>
+
+<!-- MODAL rota -->
+<div class="overlay" id="mdRota"><div class="modal wide"><div class="mh"><h3 id="rotaTitle">Rota</h3><button class="xbtn" data-close="mdRota">×</button></div>
+  <div class="mb" id="rotaBody2"></div>
+  <div class="mf"><button class="btn" data-close="mdRota">Fechar</button></div>
+</div></div>
+
+<script src="figbor-core.js"></script>
+<script>
+(function(){
+  "use strict";
+  var STORE=FIG.data("transporte");
+  var db=null;
+
+  var ROTA_LAB={em_rota:"Em rota",planejada:"Planejada",finalizada:"Finalizada",atrasada:"Atrasada"};
+  var ROTA_CLS={em_rota:"info",planejada:"slate",finalizada:"ok",atrasada:"danger"};
+  var CARGA_LAB={carregando:"Carregando",em_transito:"Em trânsito",entregue:"Entregue",atrasada:"Atrasada",cancelada:"Cancelada"};
+  var CARGA_CLS={carregando:"warn",em_transito:"info",entregue:"ok",atrasada:"danger",cancelada:"slate"};
+  var MOT_LAB={em_rota:"Em rota",parado:"Parado",finalizado:"Finalizado"};
+  var MOT_CLS={em_rota:"info",parado:"warn",finalizado:"ok"};
+  var ENT_LAB={a_caminho:"A caminho",entregue:"Entregue",falha:"Falha"};
+  var ENT_CLS={a_caminho:"info",entregue:"ok",falha:"danger"};
+  var STOP_LAB={done:"Entregue",cur:"Em andamento",next:"Pendente",falha:"Falha"};
+  var STOP_CLS={done:"ok",cur:"info",next:"slate",falha:"danger"};
+
+  function seed(){
+    var rotas=[
+      {id:"r1",nome:"ROTA PR-01 Curitiba Sul",motorista:"João Batista Ferreira",veiculo:"Volvo VM 270",placa:"BRA2E19",filial:"12-FILIAL PR",paradas:9,km:214,saida:"05:40",previsao:"16:20",status:"em_rota",feitas:5,
+        stops:[
+          {ord:1,cliente:"Mercado Central Batel",cidade:"Curitiba/PR",jan:"07:00–09:00",st:"done"},
+          {ord:2,cliente:"Supermercados Condor",cidade:"Curitiba/PR",jan:"08:30–10:30",st:"done"},
+          {ord:3,cliente:"Atacado Muffato",cidade:"São José dos Pinhais/PR",jan:"09:30–11:30",st:"done"},
+          {ord:4,cliente:"Distribuidora Sul Ltda",cidade:"Araucária/PR",jan:"10:30–12:00",st:"done"},
+          {ord:5,cliente:"Mercado Jacomel",cidade:"Piraquara/PR",jan:"11:30–13:30",st:"done"},
+          {ord:6,cliente:"Rede Nacional Colombo",cidade:"Colombo/PR",jan:"13:00–15:00",st:"cur"},
+          {ord:7,cliente:"Super Rondon",cidade:"Pinhais/PR",jan:"14:00–16:00",st:"next"},
+          {ord:8,cliente:"Mercearia Boa Vista",cidade:"Curitiba/PR",jan:"15:00–17:00",st:"next"},
+          {ord:9,cliente:"Atacadão Cristo Rei",cidade:"Curitiba/PR",jan:"15:30–17:30",st:"next"}
+        ]},
+      {id:"r2",nome:"ROTA DF-03 Plano Piloto",motorista:"Carlos Eduardo Nunes",veiculo:"Mercedes Accelo 1016",placa:"JKL7C21",filial:"10-FILIAL DF",paradas:8,km:132,saida:"06:10",previsao:"15:00",status:"em_rota",feitas:6,
+        stops:[
+          {ord:1,cliente:"Comper Asa Sul",cidade:"Brasília/DF",jan:"07:30–09:30",st:"done"},
+          {ord:2,cliente:"Super Adega Norte",cidade:"Brasília/DF",jan:"08:00–10:00",st:"done"},
+          {ord:3,cliente:"Big Box Sudoeste",cidade:"Brasília/DF",jan:"09:00–11:00",st:"done"},
+          {ord:4,cliente:"Atacado Dia a Dia",cidade:"Taguatinga/DF",jan:"10:00–12:00",st:"done"},
+          {ord:5,cliente:"Supermercado Rossi",cidade:"Águas Claras/DF",jan:"11:00–13:00",st:"done"},
+          {ord:6,cliente:"Mercado Pague Menos",cidade:"Ceilândia/DF",jan:"12:00–14:00",st:"done"},
+          {ord:7,cliente:"Rede Econômico",cidade:"Samambaia/DF",jan:"13:00–15:00",st:"cur"},
+          {ord:8,cliente:"Atacadão Gama",cidade:"Gama/DF",jan:"14:00–16:00",st:"next"}
+        ]},
+      {id:"r3",nome:"ROTA RS-02 Serra Gaúcha",motorista:"Anderson Luiz Schmitt",veiculo:"Iveco Tector 240",placa:"ITG5D88",filial:"6-FILIAL RS",paradas:10,km:298,saida:"04:50",previsao:"17:40",status:"atrasada",feitas:3,
+        stops:[
+          {ord:1,cliente:"Super Imec Caxias",cidade:"Caxias do Sul/RS",jan:"07:00–09:00",st:"done"},
+          {ord:2,cliente:"Andreazza Supermercados",cidade:"Caxias do Sul/RS",jan:"08:00–10:00",st:"done"},
+          {ord:3,cliente:"Rede Peruzzo",cidade:"Bento Gonçalves/RS",jan:"09:30–11:30",st:"falha"},
+          {ord:4,cliente:"Mercado Zaffari",cidade:"Farroupilha/RS",jan:"10:30–12:30",st:"cur"},
+          {ord:5,cliente:"Super Casagrande",cidade:"Garibaldi/RS",jan:"11:30–13:30",st:"next"},
+          {ord:6,cliente:"Atacado Rissul",cidade:"Carlos Barbosa/RS",jan:"12:30–14:30",st:"next"},
+          {ord:7,cliente:"Mercearia Central",cidade:"Nova Prata/RS",jan:"13:30–15:30",st:"next"},
+          {ord:8,cliente:"Super Vale Verde",cidade:"Veranópolis/RS",jan:"14:30–16:00",st:"next"},
+          {ord:9,cliente:"Comercial Fontana",cidade:"Antônio Prado/RS",jan:"15:00–16:30",st:"next"},
+          {ord:10,cliente:"Mercado Bortolini",cidade:"Flores da Cunha/RS",jan:"15:30–17:30",st:"next"}
+        ]},
+      {id:"r4",nome:"ROTA MS-01 Campo Grande",motorista:"Roberto Almeida Rocha",veiculo:"Scania P310",placa:"MSC1A45",filial:"2-MS/MTZ",paradas:7,km:176,saida:"05:20",previsao:"14:30",status:"em_rota",feitas:4,
+        stops:[
+          {ord:1,cliente:"Comper Centro",cidade:"Campo Grande/MS",jan:"07:00–09:00",st:"done"},
+          {ord:2,cliente:"Extra Fort Atacadista",cidade:"Campo Grande/MS",jan:"08:00–10:00",st:"done"},
+          {ord:3,cliente:"Assaí Atacadista",cidade:"Campo Grande/MS",jan:"09:00–11:00",st:"done"},
+          {ord:4,cliente:"Super Muffato Norte",cidade:"Campo Grande/MS",jan:"10:00–12:00",st:"done"},
+          {ord:5,cliente:"Mercado Pires",cidade:"Sidrolândia/MS",jan:"11:30–13:30",st:"cur"},
+          {ord:6,cliente:"Atacado Aliança",cidade:"Terenos/MS",jan:"12:30–14:00",st:"next"},
+          {ord:7,cliente:"Super Economia",cidade:"Nova Alvorada/MS",jan:"13:00–14:30",st:"next"}
+        ]},
+      {id:"r5",nome:"ROTA SP-05 Grande SP",motorista:"Marcos Vinícius Teixeira",veiculo:"Volkswagen Delivery 11.180",placa:"SPX9F03",filial:"SP",paradas:12,km:158,saida:"06:00",previsao:"16:45",status:"em_rota",feitas:8,
+        stops:[
+          {ord:1,cliente:"Mercado Central Ltda",cidade:"São Paulo/SP",jan:"07:30–09:00",st:"done"},
+          {ord:2,cliente:"Sonda Supermercados",cidade:"São Paulo/SP",jan:"08:00–09:30",st:"done"},
+          {ord:3,cliente:"Rede Dia Osasco",cidade:"Osasco/SP",jan:"08:30–10:00",st:"done"},
+          {ord:4,cliente:"Atacadão Guarulhos",cidade:"Guarulhos/SP",jan:"09:30–11:00",st:"done"},
+          {ord:5,cliente:"Super Nagumo",cidade:"Mogi das Cruzes/SP",jan:"10:00–11:30",st:"done"},
+          {ord:6,cliente:"Mercado Roldão",cidade:"São Bernardo/SP",jan:"11:00–12:30",st:"done"},
+          {ord:7,cliente:"Enxuto Supermercados",cidade:"Santo André/SP",jan:"11:30–13:00",st:"done"},
+          {ord:8,cliente:"Super Coop Diadema",cidade:"Diadema/SP",jan:"12:30–14:00",st:"done"},
+          {ord:9,cliente:"Rede Barbosa",cidade:"São Caetano/SP",jan:"13:30–15:00",st:"cur"},
+          {ord:10,cliente:"Mercado Tauste",cidade:"Barueri/SP",jan:"14:00–15:30",st:"next"},
+          {ord:11,cliente:"Super Covabra",cidade:"Cotia/SP",jan:"14:30–16:00",st:"next"},
+          {ord:12,cliente:"Atacado Spani",cidade:"Taboão da Serra/SP",jan:"15:00–16:30",st:"next"}
+        ]},
+      {id:"r6",nome:"ROTA PR-04 Londrina Norte",motorista:"Fernando Costa Ribeiro",veiculo:"Ford Cargo 1723",placa:"PRL4B72",filial:"12-FILIAL PR",paradas:9,km:242,saida:"05:00",previsao:"17:10",status:"planejada",feitas:0,
+        stops:[
+          {ord:1,cliente:"Muffato Londrina",cidade:"Londrina/PR",jan:"07:30–09:30",st:"next"},
+          {ord:2,cliente:"Super Viander",cidade:"Londrina/PR",jan:"08:30–10:30",st:"next"},
+          {ord:3,cliente:"Cidade Canção",cidade:"Maringá/PR",jan:"09:30–11:30",st:"next"},
+          {ord:4,cliente:"Atacado Sumatra",cidade:"Maringá/PR",jan:"10:30–12:30",st:"next"},
+          {ord:5,cliente:"Rede Amigão",cidade:"Apucarana/PR",jan:"11:30–13:30",st:"next"},
+          {ord:6,cliente:"Super Bortolotto",cidade:"Arapongas/PR",jan:"12:30–14:00",st:"next"},
+          {ord:7,cliente:"Mercado Confiança",cidade:"Cambé/PR",jan:"13:30–15:00",st:"next"},
+          {ord:8,cliente:"Comercial Rolândia",cidade:"Rolândia/PR",jan:"14:30–16:00",st:"next"},
+          {ord:9,cliente:"Atacadão Ibiporã",cidade:"Ibiporã/PR",jan:"15:30–17:00",st:"next"}
+        ]},
+      {id:"r7",nome:"ROTA DF-01 Entorno",motorista:"Paulo Sérgio Mendes",veiculo:"Mercedes Atego 1719",placa:"DFE8G14",filial:"10-FILIAL DF",paradas:8,km:265,saida:"04:40",previsao:"16:00",status:"finalizada",feitas:8,
+        stops:[
+          {ord:1,cliente:"Super Bem Barato",cidade:"Luziânia/GO",jan:"07:00–09:00",st:"done"},
+          {ord:2,cliente:"Mercado Rocha",cidade:"Valparaíso/GO",jan:"08:00–10:00",st:"done"},
+          {ord:3,cliente:"Atacado Novo Gama",cidade:"Novo Gama/GO",jan:"09:00–11:00",st:"done"},
+          {ord:4,cliente:"Super Cidade Ocidental",cidade:"Cidade Ocidental/GO",jan:"10:00–12:00",st:"done"},
+          {ord:5,cliente:"Rede Formosa",cidade:"Formosa/GO",jan:"11:00–13:00",st:"done"},
+          {ord:6,cliente:"Mercado Planaltina",cidade:"Planaltina/GO",jan:"12:00–14:00",st:"done"},
+          {ord:7,cliente:"Super Águas Lindas",cidade:"Águas Lindas/GO",jan:"13:00–15:00",st:"done"},
+          {ord:8,cliente:"Atacadão Santo Antônio",cidade:"Sto Antônio Descoberto/GO",jan:"13:30–15:30",st:"done"}
+        ]},
+      {id:"r8",nome:"ROTA RS-05 Litoral",motorista:"Diego Oliveira Martins",veiculo:"Iveco Daily 70C17",placa:"RSL2H90",filial:"6-FILIAL RS",paradas:7,km:189,saida:"05:30",previsao:"15:20",status:"em_rota",feitas:2,
+        stops:[
+          {ord:1,cliente:"Super Nacional Torres",cidade:"Torres/RS",jan:"07:30–09:30",st:"done"},
+          {ord:2,cliente:"Mercado Capão",cidade:"Capão da Canoa/RS",jan:"08:30–10:30",st:"done"},
+          {ord:3,cliente:"Atacado Tramandaí",cidade:"Tramandaí/RS",jan:"09:30–11:30",st:"cur"},
+          {ord:4,cliente:"Rede Imbé",cidade:"Imbé/RS",jan:"10:30–12:30",st:"next"},
+          {ord:5,cliente:"Super Osório",cidade:"Osório/RS",jan:"11:30–13:30",st:"next"},
+          {ord:6,cliente:"Mercado Santo Antônio",cidade:"Sto Antônio da Patrulha/RS",jan:"12:30–14:00",st:"next"},
+          {ord:7,cliente:"Comercial Xangri-lá",cidade:"Xangri-lá/RS",jan:"13:30–15:00",st:"next"}
+        ]}
+    ];
+
+    var cargas=[
+      {id:"g1",numero:"CG-24801",origem:"CD Curitiba (PR)",destino:"Curitiba/PR",motorista:"João Batista Ferreira",veiculo:"BRA2E19",saida:"05:40",prev:"16:20",custo:1840.00,status:"em_transito"},
+      {id:"g2",numero:"CG-24802",origem:"CD Brasília (DF)",destino:"Brasília/DF",motorista:"Carlos Eduardo Nunes",veiculo:"JKL7C21",saida:"06:10",prev:"15:00",custo:1290.50,status:"em_transito"},
+      {id:"g3",numero:"CG-24803",origem:"CD Caxias (RS)",destino:"Serra Gaúcha/RS",motorista:"Anderson Luiz Schmitt",veiculo:"ITG5D88",saida:"04:50",prev:"17:40",custo:2610.00,status:"atrasada"},
+      {id:"g4",numero:"CG-24804",origem:"Matriz Campo Grande (MS)",destino:"Campo Grande/MS",motorista:"Roberto Almeida Rocha",veiculo:"MSC1A45",saida:"05:20",prev:"14:30",custo:1520.75,status:"em_transito"},
+      {id:"g5",numero:"CG-24805",origem:"CD São Paulo (SP)",destino:"Grande SP/SP",motorista:"Marcos Vinícius Teixeira",veiculo:"SPX9F03",saida:"06:00",prev:"16:45",custo:980.00,status:"em_transito"},
+      {id:"g6",numero:"CG-24806",origem:"CD Curitiba (PR)",destino:"Londrina/PR",motorista:"Fernando Costa Ribeiro",veiculo:"PRL4B72",saida:"05:00",prev:"17:10",custo:2180.30,status:"carregando"},
+      {id:"g7",numero:"CG-24807",origem:"CD Brasília (DF)",destino:"Entorno/GO",motorista:"Paulo Sérgio Mendes",veiculo:"DFE8G14",saida:"04:40",prev:"16:00",custo:2340.00,status:"entregue"},
+      {id:"g8",numero:"CG-24808",origem:"CD Caxias (RS)",destino:"Litoral Norte/RS",motorista:"Diego Oliveira Martins",veiculo:"RSL2H90",saida:"05:30",prev:"15:20",custo:1690.00,status:"em_transito"},
+      {id:"g9",numero:"CG-24809",origem:"Matriz Campo Grande (MS)",destino:"Dourados/MS",motorista:"Luiz Henrique Barbosa",veiculo:"MSD6J21",saida:"05:10",prev:"18:00",custo:2920.00,status:"em_transito"},
+      {id:"g10",numero:"CG-24810",origem:"CD São Paulo (SP)",destino:"Campinas/SP",motorista:"Rafael Souza Lima",veiculo:"SPC3K57",saida:"06:20",prev:"13:40",custo:760.50,status:"entregue"},
+      {id:"g11",numero:"CG-24811",origem:"CD Curitiba (PR)",destino:"Ponta Grossa/PR",motorista:"André Pereira Gomes",veiculo:"PRP7L38",saida:"05:50",prev:"12:30",custo:640.00,status:"entregue"},
+      {id:"g12",numero:"CG-24812",origem:"CD Brasília (DF)",destino:"Anápolis/GO",motorista:"Gustavo Nogueira Dias",veiculo:"DFA9M62",saida:"04:30",prev:"11:50",custo:880.00,status:"entregue"},
+      {id:"g13",numero:"CG-24813",origem:"CD Caxias (RS)",destino:"Passo Fundo/RS",motorista:"Thiago Ramos Fontoura",veiculo:"RSP4N19",saida:"03:40",prev:"12:00",custo:2470.00,status:"atrasada"},
+      {id:"g14",numero:"CG-24814",origem:"CD São Paulo (SP)",destino:"Ribeirão Preto/SP",motorista:"Eduardo Antunes Silva",veiculo:"SPR8P44",saida:"05:00",prev:"14:20",custo:1340.00,status:"cancelada"}
+    ];
+
+    var motoristas=[
+      {id:"m1",nome:"João Batista Ferreira",veiculo:"Volvo VM 270 · BRA2E19",status:"em_rota",feitas:5,total:9,pos:"Colombo/PR",hora:"13:42",rota:"ROTA PR-01 Curitiba Sul"},
+      {id:"m2",nome:"Carlos Eduardo Nunes",veiculo:"Mercedes Accelo 1016 · JKL7C21",status:"em_rota",feitas:6,total:8,pos:"Samambaia/DF",hora:"13:55",rota:"ROTA DF-03 Plano Piloto"},
+      {id:"m3",nome:"Anderson Luiz Schmitt",veiculo:"Iveco Tector 240 · ITG5D88",status:"em_rota",feitas:3,total:10,pos:"Farroupilha/RS",hora:"13:20",rota:"ROTA RS-02 Serra Gaúcha"},
+      {id:"m4",nome:"Roberto Almeida Rocha",veiculo:"Scania P310 · MSC1A45",status:"em_rota",feitas:4,total:7,pos:"Sidrolândia/MS",hora:"13:38",rota:"ROTA MS-01 Campo Grande"},
+      {id:"m5",nome:"Marcos Vinícius Teixeira",veiculo:"VW Delivery 11.180 · SPX9F03",status:"em_rota",feitas:8,total:12,pos:"São Caetano/SP",hora:"14:02",rota:"ROTA SP-05 Grande SP"},
+      {id:"m6",nome:"Fernando Costa Ribeiro",veiculo:"Ford Cargo 1723 · PRL4B72",status:"parado",feitas:0,total:9,pos:"CD Curitiba/PR",hora:"05:00",rota:"ROTA PR-04 Londrina Norte"},
+      {id:"m7",nome:"Paulo Sérgio Mendes",veiculo:"Mercedes Atego 1719 · DFE8G14",status:"finalizado",feitas:8,total:8,pos:"CD Brasília/DF",hora:"16:05",rota:"ROTA DF-01 Entorno"},
+      {id:"m8",nome:"Diego Oliveira Martins",veiculo:"Iveco Daily 70C17 · RSL2H90",status:"em_rota",feitas:2,total:7,pos:"Tramandaí/RS",hora:"11:48",rota:"ROTA RS-05 Litoral"},
+      {id:"m9",nome:"Luiz Henrique Barbosa",veiculo:"Scania R450 · MSD6J21",status:"em_rota",feitas:1,total:5,pos:"Nova Andradina/MS",hora:"12:10",rota:"ROTA MS-04 Dourados"},
+      {id:"m10",nome:"Rafael Souza Lima",veiculo:"VW Constellation · SPC3K57",status:"finalizado",feitas:6,total:6,pos:"CD São Paulo/SP",hora:"13:44",rota:"ROTA SP-02 Campinas"},
+      {id:"m11",nome:"André Pereira Gomes",veiculo:"Ford Cargo 816 · PRP7L38",status:"finalizado",feitas:5,total:5,pos:"CD Curitiba/PR",hora:"12:35",rota:"ROTA PR-07 Campos Gerais"},
+      {id:"m12",nome:"Thiago Ramos Fontoura",veiculo:"Iveco Tector 260 · RSP4N19",status:"parado",feitas:2,total:8,pos:"Marau/RS",hora:"11:05",rota:"ROTA RS-08 Planalto"}
+    ];
+
+    var entregas=[
+      {id:"e1",pedido:"PD-98120",cliente:"Mercado Central Batel",endereco:"Av. do Batel, 1220 — Curitiba/PR",janela:"07:00–09:00",motorista:"João Batista Ferreira",status:"entregue",comprovante:"ok"},
+      {id:"e2",pedido:"PD-98121",cliente:"Supermercados Condor",endereco:"R. Marechal Deodoro, 500 — Curitiba/PR",janela:"08:30–10:30",motorista:"João Batista Ferreira",status:"entregue",comprovante:"ok"},
+      {id:"e3",pedido:"PD-98122",cliente:"Rede Nacional Colombo",endereco:"Av. da Integração, 88 — Colombo/PR",janela:"13:00–15:00",motorista:"João Batista Ferreira",status:"a_caminho",comprovante:"pendente"},
+      {id:"e4",pedido:"PD-98123",cliente:"Comper Asa Sul",endereco:"SQS 302 Bloco B — Brasília/DF",janela:"07:30–09:30",motorista:"Carlos Eduardo Nunes",status:"entregue",comprovante:"ok"},
+      {id:"e5",pedido:"PD-98124",cliente:"Rede Econômico Samambaia",endereco:"QN 302 — Samambaia/DF",janela:"13:00–15:00",motorista:"Carlos Eduardo Nunes",status:"a_caminho",comprovante:"pendente"},
+      {id:"e6",pedido:"PD-98125",cliente:"Rede Peruzzo",endereco:"R. Henry Hugo Dreher, 40 — Bento Gonçalves/RS",janela:"09:30–11:30",motorista:"Anderson Luiz Schmitt",status:"falha",comprovante:"pendente"},
+      {id:"e7",pedido:"PD-98126",cliente:"Mercado Zaffari Farroupilha",endereco:"Av. Pref. Emílio Zanella, 210 — Farroupilha/RS",janela:"10:30–12:30",motorista:"Anderson Luiz Schmitt",status:"a_caminho",comprovante:"pendente"},
+      {id:"e8",pedido:"PD-98127",cliente:"Comper Centro",endereco:"R. 14 de Julho, 3300 — Campo Grande/MS",janela:"07:00–09:00",motorista:"Roberto Almeida Rocha",status:"entregue",comprovante:"ok"},
+      {id:"e9",pedido:"PD-98128",cliente:"Mercado Pires Sidrolândia",endereco:"Av. Fernando C. da Costa, 900 — Sidrolândia/MS",janela:"11:30–13:30",motorista:"Roberto Almeida Rocha",status:"a_caminho",comprovante:"pendente"},
+      {id:"e10",pedido:"PD-98129",cliente:"Sonda Supermercados",endereco:"Av. Sapopemba, 5000 — São Paulo/SP",janela:"08:00–09:30",motorista:"Marcos Vinícius Teixeira",status:"entregue",comprovante:"ok"},
+      {id:"e11",pedido:"PD-98130",cliente:"Rede Barbosa",endereco:"R. Alegre, 120 — São Caetano/SP",janela:"13:30–15:00",motorista:"Marcos Vinícius Teixeira",status:"a_caminho",comprovante:"pendente"},
+      {id:"e12",pedido:"PD-98131",cliente:"Super Nacional Torres",endereco:"Av. Barão do Rio Branco, 45 — Torres/RS",janela:"07:30–09:30",motorista:"Diego Oliveira Martins",status:"entregue",comprovante:"ok"},
+      {id:"e13",pedido:"PD-98132",cliente:"Atacado Tramandaí",endereco:"Av. Emancipação, 780 — Tramandaí/RS",janela:"09:30–11:30",motorista:"Diego Oliveira Martins",status:"a_caminho",comprovante:"pendente"},
+      {id:"e14",pedido:"PD-98133",cliente:"Super Bem Barato",endereco:"Q. 42 Lote 3 — Luziânia/GO",janela:"07:00–09:00",motorista:"Paulo Sérgio Mendes",status:"entregue",comprovante:"ok"},
+      {id:"e15",pedido:"PD-98134",cliente:"Atacadão Santo Antônio",endereco:"BR-060 Km 12 — Sto Antônio do Descoberto/GO",janela:"13:30–15:30",motorista:"Paulo Sérgio Mendes",status:"entregue",comprovante:"ok"}
+    ];
+
+    var freteFilial=[
+      {filial:"12-FILIAL PR",valor:186400},
+      {filial:"10-FILIAL DF",valor:142900},
+      {filial:"6-FILIAL RS",valor:168300},
+      {filial:"2-MS/MTZ",valor:124700},
+      {filial:"SP",valor:98600}
+    ];
+
+    return {rotas:rotas,cargas:cargas,motoristas:motoristas,entregas:entregas,freteFilial:freteFilial};
+  }
+
+  function save(){STORE.set(db);}
+
+  /* ---------- PAINEL ---------- */
+  function renderPainel(){
+    var totalEntregas=db.entregas.length;
+    var entregues=db.entregas.filter(function(e){return e.status==="entregue";}).length;
+    var aCaminho=db.entregas.filter(function(e){return e.status==="a_caminho";}).length;
+    var falhas=db.entregas.filter(function(e){return e.status==="falha";}).length;
+    var emRota=db.motoristas.filter(function(m){return m.status==="em_rota";}).length;
+    var atrasadas=db.rotas.filter(function(r){return r.status==="atrasada";}).length;
+    var custoMes=db.freteFilial.reduce(function(s,f){return s+f.valor;},0);
+    var noPrazo=Math.round(entregues/((entregues+falhas)||1)*100);
+
+    var kpis=[
+      {lab:"Entregas hoje",val:FIG.nf(totalEntregas),cap:"pedidos programados",cls:"info"},
+      {lab:"Em rota",val:FIG.nf(emRota),cap:"veículos rodando agora",cls:"violet"},
+      {lab:"Entregues",val:FIG.nf(entregues),cap:"comprovantes confirmados",cls:"ok"},
+      {lab:"Atrasadas",val:FIG.nf(atrasadas),cap:"rotas fora do prazo",cls:"danger"}
+    ];
+    document.getElementById("kpis").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+
+    var kpis2=[
+      {lab:"Custo de frete (mês)",val:FIG.brl(custoMes),cap:db.freteFilial.length+" filiais",cls:"warn"},
+      {lab:"No prazo",val:noPrazo+"%",cap:"entregas sem falha",cls:"ok"},
+      {lab:"A caminho",val:FIG.nf(aCaminho),cap:"pedidos em trânsito",cls:"info"},
+      {lab:"Falhas de entrega",val:FIG.nf(falhas),cap:"requerem reagendamento",cls:"danger"}
+    ];
+    document.getElementById("kpis2").innerHTML=kpis2.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+
+    var scounts={entregue:entregues,a_caminho:aCaminho,falha:falhas};
+    var smax=Math.max(1,entregues,aCaminho,falhas);
+    document.getElementById("barsStatus").innerHTML=["entregue","a_caminho","falha"].map(function(s){
+      return '<div class="bar"><span class="bl">'+ENT_LAB[s]+'</span><span class="bt"><span class="bf" style="width:'+Math.round(scounts[s]/smax*100)+'%;background:var(--'+ENT_CLS[s]+')"></span></span><span class="bn">'+scounts[s]+'</span></div>';
+    }).join("");
+
+    var fmax=Math.max.apply(null,db.freteFilial.map(function(f){return f.valor;}));
+    document.getElementById("barsFilial").innerHTML=db.freteFilial.slice().sort(function(a,b){return b.valor-a.valor;}).map(function(f){
+      return '<div class="bar"><span class="bl">'+FIG.esc(f.filial)+'</span><span class="bt"><span class="bf" style="width:'+Math.round(f.valor/fmax*100)+'%"></span></span><span class="bn">'+FIG.brl(f.valor)+'</span></div>';
+    }).join("");
+
+    var rot=db.rotas.filter(function(r){return r.status==="em_rota"||r.status==="atrasada";});
+    document.getElementById("emRotaHint").textContent=rot.length+" veículo(s)";
+    document.getElementById("emRotaBody").innerHTML=rot.map(function(r){
+      var cur=r.stops.filter(function(s){return s.st==="cur";})[0]||r.stops[Math.min(r.feitas,r.stops.length-1)];
+      var pct=Math.round(r.feitas/r.paradas*100);
+      return '<tr><td class="prod">'+FIG.esc(r.nome)+'</td><td>'+FIG.esc(r.motorista)+'</td><td class="mono">'+FIG.esc(r.placa)+'</td>'+
+        '<td>'+FIG.esc(cur?cur.cidade:"—")+'</td>'+
+        '<td class="num"><div class="miniprog"><span class="bt"><span class="bf" style="width:'+pct+'%"></span></span><span class="lb">'+r.feitas+'/'+r.paradas+'</span></div></td>'+
+        '<td class="mono">'+FIG.esc(r.previsao)+'</td><td><span class="badge '+ROTA_CLS[r.status]+'">'+ROTA_LAB[r.status]+'</span></td></tr>';
+    }).join("");
+  }
+
+  /* ---------- ROTEIRIZACAO ---------- */
+  function renderRotas(){
+    var q=(document.getElementById("qRota").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fRotaStatus").value;
+    var rows=db.rotas.filter(function(r){
+      if(fs&&r.status!==fs)return false;
+      if(q){var hay=(r.nome+" "+r.motorista+" "+r.placa+" "+r.veiculo).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("rotaCount").textContent=rows.length+" rota(s)";
+    document.getElementById("rotaBody").innerHTML=rows.length?rows.map(function(r){
+      return '<tr class="clk" data-rota="'+r.id+'"><td class="prod">'+FIG.esc(r.nome)+'</td><td>'+FIG.esc(r.motorista)+'</td>'+
+        '<td>'+FIG.esc(r.veiculo)+' <span class="mono muted">('+FIG.esc(r.placa)+')</span></td>'+
+        '<td class="num">'+r.feitas+'/'+r.paradas+'</td><td class="num">'+FIG.nf(r.km)+' km</td>'+
+        '<td class="mono">'+FIG.esc(r.saida)+'</td><td class="mono">'+FIG.esc(r.previsao)+'</td>'+
+        '<td><span class="badge '+ROTA_CLS[r.status]+'">'+ROTA_LAB[r.status]+'</span></td></tr>';
+    }).join(""):'<tr><td colspan="8"><div class="empty"><b>Nenhuma rota</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  function schematicMap(r){
+    var stops=r.stops;
+    var n=stops.length;
+    var W=680,H=160,padX=34,padY=44;
+    var innerW=W-padX*2;
+    var pts=stops.map(function(s,i){
+      var x=padX+(n>1?innerW*i/(n-1):innerW/2);
+      var y=padY+((i%2===0)?0:64);
+      return {x:x,y:y,s:s};
+    });
+    var col={done:"var(--ok)",cur:"var(--acc)",next:"var(--slate)",falha:"var(--danger)"};
+    var lines="";
+    for(var i=0;i<pts.length-1;i++){
+      var a=pts[i],b=pts[i+1];
+      var doneSeg=(a.s.st==="done");
+      lines+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+(doneSeg?"var(--ok)":"var(--card-line)")+'" stroke-width="'+(doneSeg?3:2)+'" '+(doneSeg?"":'stroke-dasharray="4 4"')+'/>';
+    }
+    var dots="";
+    pts.forEach(function(p){
+      dots+='<circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="'+col[p.s.st]+'"/>';
+      dots+='<circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="none" stroke="var(--card-bg)" stroke-width="2"/>';
+      dots+='<text x="'+p.x+'" y="'+p.y+'" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="800" fill="#fff">'+p.s.ord+'</text>';
+      var ty=(p.y<padY+30)?p.y-15:p.y+23;
+      var city=String(p.s.cidade).split("/")[0];
+      dots+='<text x="'+p.x+'" y="'+ty+'" text-anchor="middle" font-size="9.5" fill="var(--page-sub)">'+FIG.esc(city.length>13?city.slice(0,12)+"…":city)+'</text>';
+    });
+    return '<div class="mapbox"><svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+lines+dots+'</svg></div>';
+  }
+
+  function openRota(id){
+    var r=db.rotas.filter(function(x){return x.id===id;})[0];if(!r)return;
+    document.getElementById("rotaTitle").textContent=r.nome;
+    var head=''+
+      '<div class="kpis" style="grid-template-columns:repeat(4,1fr)">'+
+        '<div class="kpi info"><span class="rail"></span><div class="lab">Motorista</div><div class="val" style="font-size:15px">'+FIG.esc(r.motorista)+'</div><div class="cap">'+FIG.esc(r.veiculo)+'</div></div>'+
+        '<div class="kpi"><span class="rail"></span><div class="lab">Placa</div><div class="val mono" style="font-size:18px">'+FIG.esc(r.placa)+'</div><div class="cap">'+FIG.esc(r.filial)+'</div></div>'+
+        '<div class="kpi violet"><span class="rail"></span><div class="lab">Paradas</div><div class="val">'+r.feitas+'/'+r.paradas+'</div><div class="cap">'+FIG.nf(r.km)+' km · '+r.saida+'→'+r.previsao+'</div></div>'+
+        '<div class="kpi '+ROTA_CLS[r.status]+'"><span class="rail"></span><div class="lab">Status</div><div class="val" style="font-size:18px">'+ROTA_LAB[r.status]+'</div><div class="cap">previsão '+r.previsao+'</div></div>'+
+      '</div>';
+    var leg='<div class="muted" style="font-size:12px;margin:14px 0 2px"><span class="legdot" style="background:var(--ok)"></span>Entregue&nbsp;&nbsp;<span class="legdot" style="background:var(--acc)"></span>Em andamento&nbsp;&nbsp;<span class="legdot" style="background:var(--slate)"></span>Pendente&nbsp;&nbsp;<span class="legdot" style="background:var(--danger)"></span>Falha</div>';
+    var seq='<div class="stopseq">'+r.stops.map(function(s){
+      var cls=s.st==="done"?"done":(s.st==="cur"?"cur":"");
+      return '<div class="stp '+cls+'"><span class="ord">'+s.ord+'</span>'+
+        '<span><span class="cn">'+FIG.esc(s.cliente)+'</span><br><span class="cc">'+FIG.esc(s.cidade)+'</span></span>'+
+        '<span style="text-align:right"><span class="jw">'+FIG.esc(s.jan)+'</span><br><span class="badge '+STOP_CLS[s.st]+'">'+STOP_LAB[s.st]+'</span></span></div>';
+    }).join("")+'</div>';
+    document.getElementById("rotaBody2").innerHTML=head+leg+schematicMap(r)+'<h3 style="font-size:14px;font-weight:700;margin:6px 0 2px">Sequência de paradas</h3>'+seq;
+    FIG.openModal("mdRota");
+  }
+
+  /* ---------- MOTORISTAS ---------- */
+  function renderMot(){
+    var q=(document.getElementById("qMot").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fMotStatus").value;
+    var rows=db.motoristas.filter(function(m){
+      if(fs&&m.status!==fs)return false;
+      if(q){var hay=(m.nome+" "+m.pos+" "+m.rota+" "+m.veiculo).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("motCount").textContent=rows.length+" motorista(s)";
+    document.getElementById("motBody").innerHTML=rows.length?rows.map(function(m){
+      var pct=m.total?Math.round(m.feitas/m.total*100):0;
+      return '<tr><td class="prod">'+FIG.esc(m.nome)+'</td><td>'+FIG.esc(m.veiculo)+'</td>'+
+        '<td><span class="badge '+MOT_CLS[m.status]+'">'+MOT_LAB[m.status]+'</span></td>'+
+        '<td class="num"><div class="miniprog"><span class="bt"><span class="bf" style="width:'+pct+'%"></span></span><span class="lb">'+m.feitas+'/'+m.total+'</span></div></td>'+
+        '<td>'+FIG.esc(m.pos)+'</td><td class="mono">'+FIG.esc(m.hora)+'</td><td class="muted">'+FIG.esc(m.rota)+'</td></tr>';
+    }).join(""):'<tr><td colspan="7"><div class="empty"><b>Nenhum motorista</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ---------- CARGAS ---------- */
+  function renderCargas(){
+    var q=(document.getElementById("qCarga").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fCargaStatus").value;
+    var rows=db.cargas.filter(function(g){
+      if(fs&&g.status!==fs)return false;
+      if(q){var hay=(g.numero+" "+g.destino+" "+g.origem+" "+g.motorista+" "+g.veiculo).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("cargaCount").textContent=rows.length+" carga(s)";
+    document.getElementById("cargaBody").innerHTML=rows.length?rows.map(function(g){
+      return '<tr><td class="mono">'+FIG.esc(g.numero)+'</td>'+
+        '<td>'+FIG.esc(g.origem)+' <span class="arw">→</span> <b>'+FIG.esc(g.destino)+'</b></td>'+
+        '<td>'+FIG.esc(g.motorista)+'</td><td class="mono">'+FIG.esc(g.veiculo)+'</td>'+
+        '<td class="mono">'+FIG.esc(g.saida)+'</td><td class="mono">'+FIG.esc(g.prev)+'</td>'+
+        '<td class="num">'+FIG.brl(g.custo)+'</td>'+
+        '<td><span class="badge '+CARGA_CLS[g.status]+'">'+CARGA_LAB[g.status]+'</span></td></tr>';
+    }).join(""):'<tr><td colspan="8"><div class="empty"><b>Nenhuma carga</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ---------- ENTREGAS ---------- */
+  function renderEnt(){
+    var q=(document.getElementById("qEnt").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fEntStatus").value;
+    var rows=db.entregas.filter(function(e){
+      if(fs&&e.status!==fs)return false;
+      if(q){var hay=(e.pedido+" "+e.cliente+" "+e.endereco+" "+e.motorista).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("entCount").textContent=rows.length+" entrega(s)";
+    document.getElementById("entBody").innerHTML=rows.length?rows.map(function(e){
+      var comp=e.comprovante==="ok"?'<span class="badge ok">Recebido</span>':'<span class="badge slate">Pendente</span>';
+      return '<tr><td class="mono">'+FIG.esc(e.pedido)+'</td><td class="prod">'+FIG.esc(e.cliente)+'</td>'+
+        '<td class="muted">'+FIG.esc(e.endereco)+'</td><td class="mono">'+FIG.esc(e.janela)+'</td>'+
+        '<td>'+FIG.esc(e.motorista)+'</td>'+
+        '<td><span class="badge '+ENT_CLS[e.status]+'">'+ENT_LAB[e.status]+'</span></td>'+
+        '<td>'+comp+'</td></tr>';
+    }).join(""):'<tr><td colspan="7"><div class="empty"><b>Nenhuma entrega</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  function render(){renderPainel();renderRotas();renderMot();renderCargas();renderEnt();save();}
+
+  function wire(){
+    document.getElementById("tabs").addEventListener("click",function(e){var t=e.target.closest(".tab");if(!t)return;
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});document.querySelectorAll(".view").forEach(function(x){x.classList.remove("active");});
+      t.classList.add("active");document.getElementById("view-"+t.getAttribute("data-view")).classList.add("active");});
+
+    ["qRota","fRotaStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderRotas);});
+    ["qMot","fMotStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderMot);});
+    ["qCarga","fCargaStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderCargas);});
+    ["qEnt","fEntStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderEnt);});
+
+    document.getElementById("rotaBody").addEventListener("click",function(e){var t=e.target.closest("[data-rota]");if(t)openRota(t.getAttribute("data-rota"));});
+
+    function expCargas(){
+      FIG.downloadCSV("figbor-transporte-cargas-"+FIG.iso(FIG.today0())+".csv",
+        ["numero","origem","destino","motorista","veiculo","saida","previsao","custo","status"],
+        db.cargas.map(function(g){return {numero:g.numero,origem:g.origem,destino:g.destino,motorista:g.motorista,veiculo:g.veiculo,saida:g.saida,previsao:g.prev,custo:g.custo,status:CARGA_LAB[g.status]};}));
+      FIG.toast("Cargas exportadas.");
+    }
+    document.getElementById("btnExpGeral").addEventListener("click",expCargas);
+    document.getElementById("btnExpCarga").addEventListener("click",expCargas);
+    document.getElementById("btnExpEnt").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-transporte-entregas-"+FIG.iso(FIG.today0())+".csv",
+        ["pedido","cliente","endereco","janela","motorista","status","comprovante"],
+        db.entregas.map(function(e){return {pedido:e.pedido,cliente:e.cliente,endereco:e.endereco,janela:e.janela,motorista:e.motorista,status:ENT_LAB[e.status],comprovante:e.comprovante==="ok"?"Recebido":"Pendente"};}));
+      FIG.toast("Entregas exportadas.");
+    });
+  }
+
+  FIG.requireAuth(function(){
+    FIG.mountChrome({module:"transporte"});
+    db=STORE.get(null)||seed();
+    if(!db||!db.rotas||!db.rotas.length){db=seed();}
+    FIG.wireModals();wire();render();
+  });
+})();
+</script>
+</body>
+</html>

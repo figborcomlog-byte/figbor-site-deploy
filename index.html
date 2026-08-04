@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0C">
+<title>FIGBOR | Inteligência Comercial e Logística</title>
+<meta name="description" content="FIGBOR: plataforma modular que une inteligência comercial e logística. Estoque, Comercial, Produção e Transporte. Contrate por módulo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="icon" id="fav">
+<style>
+  :root{
+    --bg:#0A0A0C; --bg2:#0E0E11; --card:#111115; --card2:#15151A; --line:rgba(255,255,255,.08); --line-s:rgba(255,255,255,.05);
+    --fg:#ECEDF0; --sub:#8E8F98; --muted:#63646C;
+    --blue:#3D82D6; --blue-2:#6FA6EA; --orange:#E8843A; --orange-2:#F2A662;
+    --grad-blue:linear-gradient(135deg,#2E5E9E,#6FA3E6);
+    --grad-orange:linear-gradient(135deg,#D96B1E,#F4A860);
+    --grad-bo:linear-gradient(100deg,#3D82D6,#E8843A);
+    --track:rgba(255,255,255,.07); --soft:rgba(255,255,255,.03); --shadow:0 40px 90px rgba(0,0,0,.45);
+  }
+  html[data-theme="light"]{
+    --bg:#F6F8FB; --bg2:#FFFFFF; --card:#FFFFFF; --card2:#F3F5F9; --line:rgba(16,26,46,.12); --line-s:rgba(16,26,46,.08);
+    --fg:#141A28; --sub:#5B6472; --muted:#8A90A0;
+    --blue:#2E6BB8; --blue-2:#2E6BB8; --orange:#E8843A; --orange-2:#D96B1E;
+    --track:rgba(16,26,46,.07); --soft:rgba(16,26,46,.02); --shadow:0 24px 60px rgba(16,26,46,.12);
+  }
+  *{box-sizing:border-box}html,body{margin:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.65;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,h4,.head{font-family:'Montserrat','Inter',sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .blue-t{background:var(--grad-blue);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .orange-t{background:var(--grad-orange);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lsym{display:inline-block;line-height:0}.lsym svg{width:100%;height:100%;display:block;overflow:visible}
+  /* wordmark na fonte do logo (Montserrat ExtraBold), FIG azul / BOR laranja */
+  .wm{font-family:'Montserrat',sans-serif;font-weight:800;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;display:inline-flex}
+  .wm .fig{color:var(--blue)} .wm .bor{color:var(--orange)}
+  .tagline{font-size:11px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--sub)}
+
+  .btn{display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 22px;border-radius:10px;font-weight:600;font-size:14px;
+    cursor:pointer;border:1px solid transparent;transition:transform .15s,background .15s,border-color .15s,color .15s;white-space:nowrap;font-family:'Inter',sans-serif}
+  .btn.pri{background:var(--blue);color:#fff}.btn.pri:hover{background:#4a8ee0;transform:translateY(-2px)}
+  .btn.orange{background:var(--orange);color:#1c1206}.btn.orange:hover{background:#f0965a;transform:translateY(-2px)}
+  .btn.ghost{background:transparent;border-color:var(--line);color:var(--fg)}.btn.ghost:hover{border-color:var(--fg)}
+  .btn svg{width:17px;height:17px}
+  .btn.lg{height:52px;padding:0 28px;font-size:15px}
+  .btn.block{width:100%;justify-content:center}
+
+  header.nav{position:sticky;top:0;z-index:60;backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 84%,transparent);border-bottom:1px solid var(--line-s)}
+  .nav .wrap{display:flex;align-items:center;gap:16px;height:72px;max-width:100%;padding:0 30px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mk{width:44px;height:36px}
+  .brand img.mk{object-fit:contain;object-position:center}
+  .brand .wm{font-size:20px}
+  .navlinks{margin-left:22px;display:flex;gap:26px}
+  .navlinks a{font-size:14px;color:var(--sub)}.navlinks a:hover{color:var(--fg)}
+  .navcta{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .tbtn{width:40px;height:40px;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;cursor:pointer;font-size:16px;line-height:1;flex:none}
+  .tbtn:hover{border-color:var(--blue-2)}
+  .navcta .btn{height:38px;padding:0 16px;font-size:13px;border-radius:9px}
+  .navtoggle{display:none;width:42px;height:42px;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;cursor:pointer;align-items:center;justify-content:center}
+  .navtoggle svg{width:20px;height:20px}
+  @media(max-width:1100px){
+    .navtoggle{display:inline-flex}
+    .navlinks{position:absolute;top:71px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--line);flex-direction:column;gap:0;margin:0;padding:6px 30px 14px;display:none}
+    .navlinks.open{display:flex}
+    .navlinks a{padding:13px 2px;border-bottom:1px solid var(--line-s);font-size:15px}
+  }
+  @media(max-width:520px){.navcta .btn.ghost{display:none}}
+  /* ajustes mobile: logo e botoes menores */
+  @media(max-width:600px){
+    .hero{padding:34px 0 44px}
+    .herologo{max-width:200px;margin-bottom:2px}
+    .hero h1{font-size:27px;margin-top:16px}
+    .hero p.lead{font-size:15px}
+    .hero .cta{flex-direction:column;gap:10px;margin-top:24px}
+    .hero .cta .btn{width:100%;justify-content:center;height:48px;font-size:14.5px;padding:0 18px}
+    .navcta .btn{height:34px;padding:0 13px;font-size:12.5px}
+    .brand .wm{font-size:17px}
+    .brand .mk{width:34px;height:28px}
+  }
+
+  .hero{text-align:center;padding:52px 0 54px;position:relative;isolation:isolate}
+  .hero .glow{position:absolute;z-index:-1;border-radius:50%;filter:blur(80px);pointer-events:none}
+  .hero .glow.b{width:min(460px,80vw);height:min(460px,80vw);background:rgba(61,130,214,.16);top:-60px;left:50%;transform:translateX(-72%)}
+  .hero .glow.o{width:min(420px,74vw);height:min(420px,74vw);background:rgba(232,132,58,.14);top:-20px;left:50%;transform:translateX(-28%)}
+  @media(prefers-reduced-motion:reduce){.hero .glow{display:none}}
+  .hero .brainbox{width:min(300px,70vw);height:min(220px,54vw);margin:0 auto 8px}
+  .herologo{width:100%;max-width:min(360px,80vw);height:auto;display:block;margin:0 auto 6px}
+  .hero .brainbox .lsym{width:100%;height:100%}
+  .hero .lockwm{font-size:44px;justify-content:center}
+  .hero .locktag{margin-top:10px}
+  .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.06;letter-spacing:-.02em;font-weight:800;margin:20px auto 0;max-width:15ch}
+  .hero p.lead{font-size:clamp(15px,2vw,19px);color:var(--sub);max-width:610px;margin:18px auto 0}
+  .hero .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+  .brainbox circle{animation:npulse 3s ease-in-out infinite}
+  .brainbox circle:nth-child(3n){animation-delay:-1s}.brainbox circle:nth-child(3n+1){animation-delay:-2s}
+  @keyframes npulse{0%,100%{opacity:1}50%{opacity:.5}}
+  @media(prefers-reduced-motion:reduce){.brainbox circle{animation:none}}
+
+  section{padding:66px 0}
+  .shead{text-align:center;max-width:680px;margin:0 auto 42px}
+  .shead .tag{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--orange);font-family:'Inter',sans-serif}
+  .shead h2{font-size:clamp(26px,3.8vw,40px);font-weight:800;letter-spacing:-.02em;margin:10px 0 0}
+  .shead p{color:var(--sub);font-size:16px;margin:12px 0 0}
+
+  /* como funciona */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:780px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--card);border:1px solid var(--line-s);border-radius:16px;padding:26px}
+  .step .num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(61,130,214,.14);color:var(--blue-2);margin-bottom:14px}
+  .step h4{margin:0 0 6px;font-size:17px;font-weight:700}
+  .step p{margin:0;color:var(--sub);font-size:14px}
+
+  /* módulos */
+  .mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media(max-width:780px){.mgrid{grid-template-columns:1fr}}
+  .mcard{background:var(--card);border:1px solid var(--line-s);border-radius:18px;padding:26px;display:flex;flex-direction:column;transition:transform .18s,border-color .18s;cursor:pointer}
+  .mcard:hover{transform:translateY(-4px)}
+  .mcard.blue:hover{border-color:rgba(61,130,214,.5)} .mcard.orange:hover{border-color:rgba(232,132,58,.5)}
+  .mcard .top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .mcard .ic{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+  .mcard.blue .ic{background:rgba(61,130,214,.13);color:var(--blue-2)}
+  .mcard.orange .ic{background:rgba(232,132,58,.13);color:var(--orange-2)}
+  .mcard .ic svg{width:25px;height:25px}
+  .mcard h3{font-size:20px;font-weight:750;margin:0}
+  .mcard .kd{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif}
+  .mcard .price{font-family:'Montserrat',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.02em;margin:2px 0}
+  .mcard .price span{font-size:14px;font-weight:600;color:var(--sub);font-family:'Inter',sans-serif}
+  .mcard.blue .price{color:var(--blue-2)} .mcard.orange .price{color:var(--orange-2)}
+  .mcard p.d{color:var(--sub);font-size:14px;margin:8px 0 16px}
+  .mcard .acts{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
+  .mcard .acts .btn{flex:1}
+  .mcard .more{font-size:13px;color:var(--sub);display:inline-flex;align-items:center;gap:6px;margin-bottom:14px}
+  .mcard .more svg{width:14px;height:14px}
+
+  .combo{margin-top:20px;text-align:center;color:var(--sub);font-size:14px}
+  .combo b{color:var(--fg)}
+
+  .fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:820px){.fgrid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.fgrid{grid-template-columns:1fr}}
+  .feat{padding:22px;border:1px solid var(--line-s);border-radius:16px;background:var(--card)}
+  .feat .fi{width:40px;height:40px;border-radius:11px;background:var(--track);display:flex;align-items:center;justify-content:center;color:var(--blue-2);margin-bottom:12px}
+  .feat .fi svg{width:20px;height:20px}
+  .feat h4{margin:0 0 4px;font-size:15.5px;font-weight:700}
+  .feat p{margin:0;color:var(--sub);font-size:13px}
+
+  .faq{max-width:760px;margin:0 auto}
+  .qa{border-bottom:1px solid var(--line-s)}
+  .qa button{width:100%;text-align:left;background:transparent;border:0;color:var(--fg);font:inherit;font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:20px 4px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+  .qa .cv{color:var(--orange);font-size:20px;transition:transform .3s}
+  .qa.open .cv{transform:rotate(45deg)}
+  .qa .a{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--sub);font-size:14.5px}
+  .qa.open .a{max-height:260px}
+  .qa .a div{padding:0 4px 20px}
+
+  .band{text-align:center;border:1px solid var(--line);border-radius:22px;padding:54px 40px;background:var(--card);position:relative;overflow:hidden}
+  .band::before{content:"";position:absolute;top:-60%;left:50%;transform:translateX(-50%);width:520px;height:520px;border-radius:50%;background:radial-gradient(closest-side,rgba(61,130,214,.14),transparent 70%)}
+  .band h2{position:relative;font-size:clamp(26px,4vw,38px);font-weight:800;margin:0;letter-spacing:-.02em}
+  .band p{position:relative;color:var(--sub);max-width:540px;margin:12px auto 0}
+  .band .cta{position:relative;margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  footer{border-top:1px solid var(--line-s);padding:44px 0 54px;color:var(--sub);font-size:13.5px}
+  footer .top{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:20px}
+  footer .cols{display:flex;gap:48px;flex-wrap:wrap}
+  footer .cols b{color:var(--fg);display:block;margin-bottom:9px;font-size:13px}
+  footer .cols a{display:block;color:var(--sub);margin-bottom:7px}footer .cols a:hover{color:var(--fg)}
+  footer .fine{border-top:1px solid var(--line-s);padding-top:18px}
+
+  /* modal explicativo do módulo */
+  .overlay{position:fixed;inset:0;background:rgba(4,4,6,.7);backdrop-filter:blur(4px);z-index:120;display:none;align-items:flex-start;justify-content:center;padding:40px 18px;overflow:auto}
+  .overlay.open{display:flex}
+  .dmodal{background:var(--card);border:1px solid var(--line);border-radius:20px;width:100%;max-width:600px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.6)}
+  .dmodal .dh{display:flex;align-items:center;gap:14px;padding:24px 24px 18px;border-bottom:1px solid var(--line-s)}
+  .dmodal .dh .ic{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+  .dmodal.blue .ic{background:rgba(61,130,214,.14);color:var(--blue-2)} .dmodal.orange .ic{background:rgba(232,132,58,.14);color:var(--orange-2)}
+  .dmodal .ic svg{width:26px;height:26px}
+  .dmodal .dh h3{margin:0;font-size:22px;font-weight:800}
+  .dmodal .dh .kd{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-family:'Inter',sans-serif}
+  .dmodal .dprice{margin-left:auto;text-align:right;font-family:'Montserrat',sans-serif;font-weight:800;font-size:24px}
+  .dmodal.blue .dprice{color:var(--blue-2)} .dmodal.orange .dprice{color:var(--orange-2)}
+  .dmodal .dprice small{display:block;font-size:11px;color:var(--sub);font-weight:600;font-family:'Inter',sans-serif}
+  .dmodal .db{padding:22px 24px}
+  .dmodal .db p{margin:0 0 16px;color:var(--sub);font-size:14.5px}
+  .dmodal .db h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg);margin:0 0 10px}
+  .dmodal .db ul{list-style:none;padding:0;margin:0 0 20px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:520px){.dmodal .db ul{grid-template-columns:1fr}}
+  .dmodal .db li{font-size:13.5px;display:flex;gap:8px;align-items:flex-start}
+  .dmodal .db li svg{width:15px;height:15px;flex:none;margin-top:3px}
+  .dmodal.blue li svg{color:var(--blue)} .dmodal.orange li svg{color:var(--orange)}
+  .dmodal .df{padding:16px 24px;border-top:1px solid var(--line-s);display:flex;gap:10px;flex-wrap:wrap}
+  .dmodal .df .btn{flex:1;justify-content:center}
+  .xbtn{position:absolute;top:18px;right:20px;border:0;background:transparent;color:var(--sub);font-size:26px;line-height:1;cursor:pointer}
+  .xbtn:hover{color:var(--fg)}
+
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="bnBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E5E9E"/><stop offset="1" stop-color="#6FA3E6"/></linearGradient>
+  <linearGradient id="bnOrange" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D96B1E"/><stop offset="1" stop-color="#F4A860"/></linearGradient>
+  <linearGradient id="bnBO" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3D82D6"/><stop offset=".5" stop-color="#9AA0B0"/><stop offset="1" stop-color="#E8843A"/></linearGradient>
+</defs></svg>
+
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#top"><img class="mk" src="figbor-icon.png?v=4" alt="FIGBOR"><span class="wm"><span class="fig">FIG</span><span class="bor">BOR</span></span></a>
+  <nav class="navlinks" id="navlinks"><a href="#como">Como funciona</a><a href="#modulos">Módulos & Preços</a><a href="#dentro">Demonstração</a><a href="#recursos">Recursos</a><a href="#faq">FAQ</a></nav>
+  <div class="navcta">
+    <button class="tbtn" id="themeBtn" title="Alternar tema" aria-label="Alternar tema">◐</button>
+    <a class="btn ghost" href="FIGBOR.html">Entrar</a><a class="btn pri" href="#modulos">Ver planos</a>
+    <button class="navtoggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</div></header>
+
+<div id="top"></div>
+<section class="hero"><span class="glow b"></span><span class="glow o"></span><div class="wrap">
+  <img id="heroImg" class="herologo" src="figbor-lockup.png?v=4" alt="FIGBOR | Inteligência Comercial e Logística">
+  <div id="heroSvgBlock" style="display:none">
+    <div class="brainbox"><span class="lsym" id="heroBrain"></span></div>
+    <div class="wm lockwm"><span class="fig">FIG</span><span class="bor">BOR</span></div>
+    <div class="tagline locktag">Inteligência Comercial e Logística</div>
+  </div>
+  <h1>Uma rede de decisões para toda a sua operação.</h1>
+  <p class="lead">FIGBOR é uma plataforma modular que conecta as áreas da sua empresa (Estoque, Comercial, Produção e Transporte) num só lugar, com dados em tempo real. Você contrata só o módulo que precisa e escala quando quiser.</p>
+  <div class="cta">
+    <a class="btn pri lg" href="#modulos">Ver módulos e preços</a>
+    <a class="btn ghost lg" href="#como">Como funciona</a>
+  </div>
+</div></section>
+
+<section id="como" style="background:var(--bg2);border-block:1px solid var(--line-s)"><div class="wrap">
+  <div class="shead reveal"><div class="tag">Como funciona</div><h2>Simples do começo ao dia a dia</h2>
+    <p>Sem instalação, sem burocracia. Em três passos você já está operando com o FIGBOR.</p></div>
+  <div class="steps">
+    <div class="step reveal"><div class="num">1</div><h4>Escolha o módulo</h4><p>Comece pela área que mais dói: Estoque, Comercial, Produção ou Transporte. Cada módulo é uma assinatura mensal independente.</p></div>
+    <div class="step reveal"><div class="num">2</div><h4>Acesse e crie sua equipe</h4><p>Entre com seu login. O administrador cria os acessos da equipe (Admin ou Operador), cada um com o que pode ver e fazer.</p></div>
+    <div class="step reveal"><div class="num">3</div><h4>Opere com dados</h4><p>Dashboards, alertas, leitura por câmera, relatórios e PDF em tempo real. A informação vira decisão na hora.</p></div>
+  </div>
+</div></section>
+
+<section id="modulos"><div class="wrap">
+  <div class="shead reveal"><div class="tag">Módulos & Preços</div><h2>Contrate só o que precisa</h2>
+    <p>Clique em um módulo para ver a explicação completa. Cada um é uma assinatura mensal independente.</p></div>
+  <div class="mgrid" id="mgrid"></div>
+  <p class="combo reveal">Quer a <b>plataforma completa</b> (os 4 módulos)? <a href="#" id="comboLink" style="color:var(--blue-2);font-weight:600">Fale com a gente</a> para condições especiais.</p>
+</div></section>
+
+<style>
+  #dentro .win{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);max-width:940px;margin:0 auto}
+  #dentro .wbar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line-s);background:var(--soft)}
+  #dentro .wbar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  #dentro .wbar .addr{margin-left:12px;flex:1;background:var(--bg);border:1px solid var(--line-s);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--sub);font-family:ui-monospace,Menlo,monospace}
+  #dentro .app{padding:0}
+  #dentro .atop{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line-s)}
+  #dentro .atop .lg{width:26px;height:20px;flex:none}
+  #dentro .atop .wm{font-weight:800;letter-spacing:.08em;font-size:14px}
+  #dentro .atop .wm .b{color:#3D82D6}#dentro .atop .wm .o{color:#E8843A}
+  #dentro .atabs{display:flex;gap:6px;margin-left:8px;flex-wrap:wrap}
+  #dentro .atabs span{font-size:11.5px;color:var(--sub);padding:5px 10px;border-radius:7px}
+  #dentro .atabs span.on{background:rgba(61,130,214,.14);color:#6FA6EA;font-weight:600}
+  #dentro .abody{padding:18px}
+  #dentro .krow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:640px){#dentro .krow{grid-template-columns:repeat(2,1fr)}}
+  #dentro .k{background:var(--bg);border:1px solid var(--line-s);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+  #dentro .k::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+  #dentro .k.b::before{background:#3D82D6}#dentro .k.o::before{background:#E8843A}#dentro .k.g::before{background:#1E9E5A}#dentro .k.r::before{background:#D92D20}
+  #dentro .k .kl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--sub)}
+  #dentro .k .kv{font-size:22px;font-weight:800;margin-top:6px;letter-spacing:-.02em}
+  #dentro .k.o .kv{color:#E8843A}#dentro .k.r .kv{color:#D92D20}
+  #dentro .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:640px){#dentro .grid{grid-template-columns:1fr}}
+  #dentro .panel{background:var(--bg);border:1px solid var(--line-s);border-radius:12px;padding:14px}
+  #dentro .panel h5{margin:0 0 12px;font-size:12.5px;font-weight:700}
+  #dentro .bar{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:10px;margin-bottom:9px}
+  #dentro .bar .bl{font-size:11.5px;color:var(--sub);font-weight:600}
+  #dentro .bar .bt{height:11px;background:var(--track);border-radius:6px;overflow:hidden}
+  #dentro .bar .bf{height:100%;border-radius:6px}
+  #dentro .bar .bn{font-size:11px;color:var(--sub);font-weight:700;min-width:44px;text-align:right}
+  #dentro table{width:100%;border-collapse:collapse;font-size:11.5px}
+  #dentro th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:0 0 8px}
+  #dentro td{padding:7px 0;border-top:1px solid var(--line-s)}
+  #dentro .bdg{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;color:#fff}
+  #dentro .cap{text-align:center;color:var(--muted);font-size:12.5px;margin-top:16px}
+  #dentro .modtabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+  #dentro .modtabs button{border:1px solid var(--line);background:transparent;color:var(--sub);font:inherit;font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s}
+  #dentro .modtabs button .d{width:8px;height:8px;border-radius:50%}
+  #dentro .modtabs button:hover{color:var(--fg);border-color:var(--fg)}
+  #dentro .modtabs button.on.blue{background:rgba(61,130,214,.14);color:#6FA6EA;border-color:transparent}
+  #dentro .modtabs button.on.orange{background:rgba(232,132,58,.14);color:#F2A662;border-color:transparent}
+</style>
+<section id="dentro"><div class="wrap">
+  <div class="shead reveal"><div class="tag">Veja por dentro</div><h2>Um sistema, não uma planilha</h2>
+    <p>Painéis claros e em tempo real. Clique num módulo e veja um exemplo do painel.</p></div>
+  <div class="modtabs reveal" id="modtabs"></div>
+  <div class="win reveal" id="mockWin"></div>
+  <p class="cap reveal">Estoque · Comercial · Produção · Logística — todos com este nível de detalhe.
+    <a href="FIGBOR.html" style="color:var(--blue-2);font-weight:600;margin-left:6px">Ver demonstração ao vivo →</a></p>
+</div></section>
+
+<section id="recursos" style="background:var(--bg2);border-block:1px solid var(--line-s)"><div class="wrap">
+  <div class="shead reveal"><div class="tag">Recursos</div><h2>O que vem em todos os módulos</h2></div>
+  <div class="fgrid" id="fgrid"></div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <div class="shead reveal"><div class="tag">Dúvidas</div><h2>Perguntas frequentes</h2></div>
+  <div class="faq" id="faq"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="band reveal">
+    <h2>Pronto para começar?</h2>
+    <p>Escolha um módulo e solicite sua proposta. Ativação rápida, sem burocracia.</p>
+    <div class="cta"><a class="btn pri lg" id="ctaBand" href="#modulos">Solicitar proposta</a>
+      <a class="btn ghost lg" href="FIGBOR.html">Acessar a plataforma</a></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="top">
+    <div class="brand" style="display:flex;align-items:center;gap:11px"><img class="mk" src="figbor-icon.png?v=4" alt="FIGBOR" style="width:40px;height:32px"><span class="wm" style="font-size:17px"><span class="fig">FIG</span><span class="bor">BOR</span></span></div>
+    <div class="cols">
+      <div><b>Plataforma</b><a href="FIGBOR.html">Hub</a><a href="FIGBOR-FEFO.html">Estoque</a><a href="FIGBOR-comercial.html">Comercial</a><a href="FIGBOR-producao.html">Produção</a><a href="FIGBOR-transporte.html">Transporte</a></div>
+      <div><b>Site</b><a href="#como">Como funciona</a><a href="#modulos">Módulos</a><a href="#recursos">Recursos</a><a href="#faq">FAQ</a></div>
+    </div>
+  </div>
+  <div class="fine">© <span id="yr"></span> FIGBOR · Inteligência Comercial e Logística.</div>
+</div></footer>
+
+<!-- modal explicativo -->
+<div class="overlay" id="mdMod"><div class="dmodal" id="dmodal" style="position:relative">
+  <button class="xbtn" id="dClose">×</button>
+  <div class="dh"><div class="ic" id="dIc"></div><div><div class="kd" id="dKd"></div><h3 id="dName"></h3></div><div class="dprice" id="dPrice"></div></div>
+  <div class="db">
+    <p id="dLong"></p>
+    <h4>O que você resolve</h4><ul id="dResolve"></ul>
+    <h4>Principais recursos</h4><ul id="dFeat"></ul>
+  </div>
+  <div class="df"><a class="btn" id="dAccess" href="#">Ver demonstração</a><a class="btn pri" id="dSub" href="#">Assinar este módulo</a></div>
+</div></div>
+
+<script>
+(function(){
+  "use strict";
+  /* ===== WhatsApp comercial (DDI+DDD+numero, só dígitos) ===== */
+  var WHATSAPP="";  /* ex.: "5566999990000" */
+  function waHref(m){var msg=m?("Olá! Tenho interesse no módulo "+m+" da FIGBOR.") : "Olá! Vim pelo site da FIGBOR e gostaria de uma proposta.";
+    return WHATSAPP?("https://wa.me/"+WHATSAPP.replace(/\D/g,"")+"?text="+encodeURIComponent(msg)):"#modulos";}
+
+  /* ---------- logo: cérebro em rede (azul + laranja, blend central) ---------- */
+  var R=[[128,54],[146,48],[165,50],[183,58],[198,72],[206,92],[202,113],[190,131],[172,142],[152,147],[150,74],[172,80],[190,98],[160,102],[182,118],[158,126]];
+  var ER=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],
+    [0,10],[1,10],[2,10],[2,11],[3,11],[4,12],[3,12],[10,11],[11,12],[10,13],[11,13],[13,14],[12,14],[14,6],[13,15],[14,15],[15,8],[9,15],[9,13],[15,7],[12,6],[5,12]];
+  var C=[[120,52],[120,150],[120,170]];           /* nós centrais (blend) */
+  var EC=[[0,0],[1,1],[9,9]];                      /* pontes: C[i] -> (R[j] e L[j]) */
+  function mir(p){return [240-p[0],p[1]];}
+  var L=R.map(mir);
+  function line(p,q,g){return '<line x1="'+p[0]+'" y1="'+p[1]+'" x2="'+q[0]+'" y2="'+q[1]+'" stroke="url(#'+g+')" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>';}
+  function dot(p,fill,r){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+r+'" fill="'+fill+'"/>';}
+  function brainSVG(){
+    var e='';
+    ER.forEach(function(pr){e+=line(R[pr[0]],R[pr[1]],'bnOrange');});
+    ER.forEach(function(pr){e+=line(L[pr[0]],L[pr[1]],'bnBlue');});
+    /* pontes centro */
+    e+=line(C[0],R[0],'bnBO')+line(C[0],L[0],'bnBO')+line(C[1],R[9],'bnBO')+line(C[1],L[9],'bnBO')+line(C[1],C[2],'bnBO')+line(C[0],R[10],'bnBO')+line(C[0],L[10],'bnBO')+line(C[1],R[13],'bnBO')+line(C[1],L[13],'bnBO');
+    var n='';
+    R.forEach(function(p,i){n+=dot(p,'url(#bnOrange)',i<10?4.3:3.5);});
+    L.forEach(function(p,i){n+=dot(p,'url(#bnBlue)',i<10?4.3:3.5);});
+    C.forEach(function(p,i){n+=dot(p,'#9AA0B0',i===2?3.2:4);});
+    return '<svg viewBox="0 0 240 200" aria-hidden="true">'+e+n+'</svg>';
+  }
+  ["heroBrain"].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=brainSVG();});
+  /* usa a imagem oficial (figbor-logo.png) no hero; se não existir, mostra o SVG */
+  var himg=document.getElementById("heroImg");
+  if(himg){himg.onerror=function(){himg.style.display="none";var b=document.getElementById("heroSvgBlock");if(b)b.style.display="";};}
+
+  /* favicon */
+  (function(){
+    var defs='<defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E5E9E"/><stop offset="1" stop-color="#6FA3E6"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D96B1E"/><stop offset="1" stop-color="#F4A860"/></linearGradient></defs>';
+    var e='',n='';
+    ER.forEach(function(pr){e+='<line x1="'+R[pr[0]][0]+'" y1="'+R[pr[0]][1]+'" x2="'+R[pr[1]][0]+'" y2="'+R[pr[1]][1]+'" stroke="url(#b)" stroke-width="2" opacity=".55"/>';});
+    ER.forEach(function(pr){e+='<line x1="'+L[pr[0]][0]+'" y1="'+L[pr[0]][1]+'" x2="'+L[pr[1]][0]+'" y2="'+L[pr[1]][1]+'" stroke="url(#a)" stroke-width="2" opacity=".55"/>';});
+    R.forEach(function(p,i){n+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i<10?5:4)+'" fill="url(#b)"/>';});
+    L.forEach(function(p,i){n+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i<10?5:4)+'" fill="url(#a)"/>';});
+    C.forEach(function(p){n+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4" fill="#9AA0B0"/>';});
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 240 200"><rect width="240" height="200" rx="30" fill="#0b0b0e"/>'+defs+e+n+'</svg>';
+    document.getElementById("fav").setAttribute("href","data:image/svg+xml,"+encodeURIComponent(svg));
+  })();
+
+  /* ---------- dados dos módulos ---------- */
+  var IC={
+    estoque:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>',
+    comercial:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
+    producao:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20V9l-6 4V9l-6 4V4L2 8z"/></svg>',
+    transporte:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>'
+  };
+  var chk='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  var mods=[
+    {k:"estoque",name:"Estoque & WMS",file:"FIGBOR-FEFO.html",tone:"blue",kd:"WMS · FEFO · Validade",price:"1.497",
+      desc:"O armazém inteiro sob controle: recebimento, posição, inventário, expedição e validade.",
+      long:"Um WMS completo pensado para alimentos e perecíveis. No Recebimento você confere a nota e dá entrada; na Posição de estoque enxerga saldo por lote e depósito; no Inventário acompanha a acuracidade e ajusta divergências; na Expedição o sistema monta a ordem de separação FEFO (o que vence antes, sai antes) e o romaneio. Ainda tem leitor de código de barras pela câmera, alertas de vencimento e ruptura, e histórico completo de movimentações.",
+      resolve:["Perda por vencimento","Ruptura de estoque","Separação fora de ordem (FEFO)","Inventário desatualizado","Falta de rastreio por lote"],
+      li:["Recebimento e conferência de NF","Posição por lote e depósito","Inventário e acuracidade","Separação FEFO e expedição","Alertas de validade e ruptura","Leitor de código por câmera","Movimentações e etiquetas"]},
+    {k:"comercial",name:"Comercial & Vendas",file:"FIGBOR-comercial.html",tone:"orange",kd:"Vendas · CRM · Metas",price:"1.597",
+      desc:"Vendas, vendedores, comissões e visitas — o comercial inteiro em um só lugar.",
+      long:"Muito além de registrar pedidos. Acompanhe o faturamento e a meta do mês, a equipe de Vendedores com metas, realizado e ranking, o cálculo automático de Comissões por vendedor, e o roteiro de Visitas com status e taxa de conversão. Seus Clientes ficam organizados por curva ABC, com histórico e última compra. O comercial sai das planilhas soltas e passa a decidir com dados.",
+      resolve:["Vendas espalhadas em planilhas","Sem visão de meta por vendedor","Comissão calculada na mão","Visitas sem acompanhamento","Não saber os melhores clientes"],
+      li:["Pedidos e faturamento","Vendedores, metas e ranking","Comissões automáticas","Roteiro de visitas e conversão","Clientes por curva ABC","Ticket médio e positivação"]},
+    {k:"producao",name:"Produção & PCP",file:"FIGBOR-producao.html",tone:"blue",kd:"PCP · OEE · Fábrica",price:"1.597",
+      desc:"Do plano (PCP) ao apontamento de chão de fábrica, com eficiência (OEE) em tempo real.",
+      long:"Planeje e controle a fábrica de ponta a ponta. No PCP você programa a produção conforme demanda e capacidade; em Matéria-prima acompanha saldo, necessidade das OPs e itens abaixo do mínimo; nas Ordens de Produção vê o progresso (produzido x planejado); e no Apontamento registra produção, refugo e paradas, calculando o OEE (Disponibilidade × Performance × Qualidade). Saiba na hora o que está atrasado e onde melhorar.",
+      resolve:["Falta de plano e capacidade (PCP)","Matéria-prima faltando na hora","Não saber a eficiência real (OEE)","Refugo e paradas sem controle"],
+      li:["PCP e plano de capacidade","Matéria-prima e necessidade","Ordens de produção","Apontamento (refugo e paradas)","Eficiência OEE","Acompanhamento por linha"]},
+    {k:"transporte",name:"Logística & Transporte",file:"FIGBOR-transporte.html",tone:"orange",kd:"Roteirização · Rastreio",price:"1.497",
+      desc:"Roteirização, rastreio do motorista e entregas no prazo e no custo certo.",
+      long:"A logística ponta a ponta. Na Roteirização você monta as rotas com suas paradas e visualiza o trajeto; no Rastreio de motoristas acompanha o status (em rota, parado, finalizado), a posição e as entregas do dia; em Cargas & Fretes controla origem, destino, veículo e custo; e nas Entregas confere janela, status e comprovante. Chega de descobrir o atraso pelo cliente.",
+      resolve:["Entregas atrasadas","Custo de frete sem controle","Sem rastreio do motorista","Cliente descobre o atraso primeiro"],
+      li:["Roteirização e paradas","Rastreio do motorista","Cargas e fretes","Custo de frete por período","Entregas e comprovante","Entregas no prazo (%)"]}
+  ];
+
+  document.getElementById("mgrid").innerHTML=mods.map(function(m,i){
+    return '<div class="mcard reveal '+m.tone+'" data-mod="'+i+'">'+
+      '<div class="top"><div class="ic">'+IC[m.k]+'</div><div><div class="kd">'+m.kd+'</div><h3>'+m.name+'</h3></div></div>'+
+      '<div class="price">R$ '+m.price+'<span>,00/mês</span></div>'+
+      '<p class="d">'+m.desc+'</p>'+
+      '<div class="more">'+chk.replace("stroke-width=\"3\"","stroke-width=\"2\"")+'Clique para ver tudo que o módulo faz</div>'+
+      '<div class="acts"><button class="btn ghost" data-mod-open="'+i+'">Saiba mais</button>'+
+        '<a class="btn '+(m.tone==="orange"?"orange":"pri")+'" href="'+waHref(m.name)+'" onclick="event.stopPropagation()">Assinar</a></div></div>';
+  }).join("");
+
+  /* abrir modal explicativo */
+  function openMod(i){
+    var m=mods[i];var dm=document.getElementById("dmodal");
+    dm.className="dmodal "+m.tone;
+    document.getElementById("dIc").innerHTML=IC[m.k];
+    document.getElementById("dKd").textContent=m.kd;
+    document.getElementById("dName").textContent=m.name;
+    document.getElementById("dPrice").innerHTML="R$ "+m.price+",00<small>por mês</small>";
+    document.getElementById("dLong").textContent=m.long;
+    document.getElementById("dResolve").innerHTML=m.resolve.map(function(x){return '<li>'+chk+'<span>'+x+'</span></li>';}).join("");
+    document.getElementById("dFeat").innerHTML=m.li.map(function(x){return '<li>'+chk+'<span>'+x+'</span></li>';}).join("");
+    var sub=document.getElementById("dSub");sub.href=waHref(m.name);sub.className="btn "+(m.tone==="orange"?"orange":"pri");
+    document.getElementById("dAccess").href=m.file;
+    document.getElementById("mdMod").classList.add("open");
+  }
+  function closeMod(){document.getElementById("mdMod").classList.remove("open");}
+  document.getElementById("mgrid").addEventListener("click",function(e){
+    var b=e.target.closest("[data-mod-open]");if(b){openMod(+b.getAttribute("data-mod-open"));return;}
+    var card=e.target.closest("[data-mod]");if(card&&!e.target.closest("a"))openMod(+card.getAttribute("data-mod"));
+  });
+  document.getElementById("dClose").addEventListener("click",closeMod);
+  document.getElementById("mdMod").addEventListener("click",function(e){if(e.target===this)closeMod();});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")closeMod();});
+
+  /* ---------- recursos ---------- */
+  var feats=[
+    ['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>',"Rápido e leve","No computador e no celular, sem instalar nada."],
+    ['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',"Acesso por perfil","Admin e Operador, cada um com sua permissão."],
+    ['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',"Leitor por câmera","Escaneie o código de barras direto pelo celular."],
+    ['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>',"Relatórios e backup","Dashboards, exportação CSV, PDF e backup completo."]
+  ];
+  document.getElementById("fgrid").innerHTML=feats.map(function(f){return '<div class="feat reveal"><div class="fi">'+f[0]+'</div><h4>'+f[1]+'</h4><p>'+f[2]+'</p></div>';}).join("");
+
+  /* ---------- faq ---------- */
+  var faqs=[
+    ["Posso contratar só um módulo?","Sim. Cada módulo é uma assinatura mensal independente. Comece por um e adicione os outros quando quiser, tudo no mesmo login."],
+    ["Quais são os valores?","Mensal, por módulo: Estoque R$ 1.497, Comercial R$ 1.597, Produção R$ 1.597 e Logística R$ 1.497. Para os 4 juntos, temos condições especiais. Fale com a gente."],
+    ["Preciso instalar algo?","Não. O FIGBOR roda no navegador e pode ser instalado como app (PWA) no celular ou no computador."],
+    ["Como funciona o acesso da equipe?","O administrador cria os usuários (Admin ou Operador), define quem pode o quê e pode redefinir senhas. Tudo dentro da plataforma."],
+    ["Meus dados ficam seguros?","O acesso é por perfil com senha protegida e você tem backup completo. Em planos maiores fazemos personalizações e integrações."],
+    ["Como começo?","Clique em 'Saiba mais' no módulo, veja tudo o que ele faz e clique em Assinar. A ativação é rápida."]
+  ];
+  document.getElementById("faq").innerHTML=faqs.map(function(q){return '<div class="qa reveal"><button>'+q[0]+'<span class="cv">+</span></button><div class="a"><div>'+q[1]+'</div></div></div>';}).join("");
+  document.getElementById("faq").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var qa=b.parentElement;var op=qa.classList.contains("open");document.querySelectorAll(".qa.open").forEach(function(x){x.classList.remove("open");});if(!op)qa.classList.add("open");});
+
+  /* ---------- preview interativo dos módulos ---------- */
+  var MOCK={
+    estoque:{tone:"blue",addr:"estoque",tabs:["Painel","Recebimento","Estoque","Inventário","Expedição"],
+      kpis:[["Itens em estoque","48.320","b"],["Valor do estoque","R$ 2,7 mi","g"],["Vencendo ≤90d","1.240","o"],["Rupturas","7","r"]],
+      chart:["Estoque por filial",[["PR",88,"14.900","#3D82D6"],["DF",70,"11.800","#3D82D6"],["RS",55,"9.300","#E8843A"],["SP",44,"7.420","#3D82D6"],["MS",29,"4.900","#E8843A"]]],
+      tbl:["Prioridade FEFO",["Produto","Validade","Faixa"],[
+        ["Extrato Tomate 4,1kg","vencido",["Vencido","#D92D20"]],["Molho Tomate 340g","12 dias",["Crítico","#E8843A"]],
+        ["Maionese 3kg","28 dias",["Atenção","#E8A317"]],["Ketchup 1,01kg","62 dias",["Vigiar","#2E6BB8"]]]]},
+    comercial:{tone:"orange",addr:"comercial",tabs:["Painel","Vendas","Vendedores","Comissões","Visitas"],
+      kpis:[["Faturamento (mês)","R$ 1,84 mi","g"],["% da meta","82%","b"],["Ticket médio","R$ 3.240","o"],["Positivação","71%","b"]],
+      chart:["Vendas por vendedor",[["Carlos",92,"R$ 412 mil","#E8843A"],["Ana",78,"R$ 350 mil","#3D82D6"],["Marcos",64,"R$ 288 mil","#E8843A"],["Paula",50,"R$ 224 mil","#3D82D6"],["Rafael",38,"R$ 170 mil","#E8843A"]]],
+      tbl:["Top clientes",["Cliente","Curva","Faturado 12m"],[
+        ["Mercado Central Ltda",["A","#1E9E5A"],"R$ 486 mil"],["Distribuidora Sul",["A","#1E9E5A"],"R$ 372 mil"],
+        ["Atacadão Norte",["B","#2E6BB8"],"R$ 205 mil"],["Supermercados BH",["C","#8A90A0"],"R$ 98 mil"]]]},
+    producao:{tone:"blue",addr:"producao",tabs:["Painel","PCP","Matéria-prima","OPs","Apontamento"],
+      kpis:[["OPs em produção","6","b"],["Eficiência (OEE)","78%","g"],["Produzido (mês)","142 mil","o"],["Refugo","2,1%","r"]],
+      chart:["Produção por linha",[["Linha 1",90,"58,4 mil","#3D82D6"],["Linha 2",72,"46,7 mil","#E8843A"],["Linha 3",55,"36,9 mil","#3D82D6"]]],
+      tbl:["Em produção agora",["OP","Produto","Status"],[
+        ["OP-2042","Maionese 3kg",["68%","#3D82D6"]],["OP-2043","Ketchup 1,01kg",["41%","#E8843A"]],
+        ["OP-2044","Molho Tomate 340g",["planejada","#8A90A0"]],["OP-2041","Mostarda 1,01kg",["concluída","#1E9E5A"]]]]},
+    logistica:{tone:"orange",addr:"logistica",tabs:["Painel","Roteirização","Motoristas","Cargas","Entregas"],
+      kpis:[["Entregas hoje","38","b"],["Em rota","12","o"],["No prazo","94%","g"],["Atrasadas","3","r"]],
+      chart:["Entregas por status",[["Entregue",84,"142","#1E9E5A"],["Em rota",34,"12","#2E6BB8"],["Planejada",22,"8","#8A90A0"],["Atrasada",9,"3","#D92D20"]]],
+      tbl:["Em rota agora",["Motorista","Destino","Status"],[
+        ["Carlos Souza","São Paulo/SP",["em rota","#2E6BB8"]],["João Lima","Curitiba/PR",["em rota","#2E6BB8"]],
+        ["Pedro Alves","Fortaleza/CE",["atrasada","#D92D20"]],["Marcos Dias","Belo Horizonte/MG",["parado","#8A90A0"]]]]}
+  };
+  var MODLABEL={estoque:"Estoque",comercial:"Comercial",producao:"Produção",logistica:"Logística"};
+  function cell(c){ if(Object.prototype.toString.call(c)==="[object Array]"){return '<span class="bdg" style="background:'+c[1]+'">'+c[0]+'</span>';} return c; }
+  function renderMock(key){
+    var m=MOCK[key];
+    var win='<div class="wbar"><i style="background:#E8843A"></i><i style="background:#3D82D6"></i><i style="background:#5B6472"></i><span class="addr">figbor.com.br / '+m.addr+'</span></div>'+
+      '<div class="app"><div class="atop"><span class="lg">'+brainSVG()+'</span><span class="wm"><span class="b">FIG</span><span class="o">BOR</span></span>'+
+      '<div class="atabs">'+m.tabs.map(function(t,i){return '<span'+(i===0?' class="on"':'')+'>'+t+'</span>';}).join("")+'</div></div>'+
+      '<div class="abody"><div class="krow">'+
+        m.kpis.map(function(k){return '<div class="k '+k[2]+'"><div class="kl">'+k[0]+'</div><div class="kv">'+k[1]+'</div></div>';}).join("")+
+      '</div><div class="grid">'+
+        '<div class="panel"><h5>'+m.chart[0]+'</h5>'+m.chart[1].map(function(b){return '<div class="bar"><span class="bl">'+b[0]+'</span><span class="bt"><span class="bf" style="width:'+b[1]+'%;background:'+b[3]+'"></span></span><span class="bn">'+b[2]+'</span></div>';}).join("")+'</div>'+
+        '<div class="panel"><h5>'+m.tbl[0]+'</h5><table><thead><tr>'+m.tbl[1].map(function(h){return '<th>'+h+'</th>';}).join("")+'</tr></thead><tbody>'+
+          m.tbl[2].map(function(r){return '<tr>'+r.map(function(c){return '<td>'+cell(c)+'</td>';}).join("")+'</tr>';}).join("")+
+        '</tbody></table></div>'+
+      '</div></div></div>';
+    document.getElementById("mockWin").innerHTML=win;
+    document.querySelectorAll("#modtabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-mk")===key);});
+  }
+  (function(){
+    var keys=["estoque","comercial","producao","logistica"];
+    document.getElementById("modtabs").innerHTML=keys.map(function(k){
+      return '<button data-mk="'+k+'" class="'+MOCK[k].tone+'"><span class="d" style="background:'+(MOCK[k].tone==="orange"?"#E8843A":"#3D82D6")+'"></span>'+MODLABEL[k]+'</button>';
+    }).join("");
+    document.getElementById("modtabs").addEventListener("click",function(e){var b=e.target.closest("button");if(b)renderMock(b.getAttribute("data-mk"));});
+    renderMock("estoque");
+  })();
+
+  document.getElementById("yr").textContent=new Date().getFullYear();
+  /* tema claro/escuro */
+  var tbtn=document.getElementById("themeBtn");
+  function applyTheme(t){document.documentElement.setAttribute("data-theme",t);if(tbtn)tbtn.textContent=(t==="light"?"☀":"◐");}
+  var savedTheme=localStorage.getItem("figbor_theme")||"dark";applyTheme(savedTheme);
+  if(tbtn)tbtn.addEventListener("click",function(){var t=(localStorage.getItem("figbor_theme")||"dark")==="light"?"dark":"light";localStorage.setItem("figbor_theme",t);applyTheme(t);});
+  /* menu mobile */
+  var nt=document.getElementById("navToggle"),nl=document.getElementById("navlinks");
+  if(nt&&nl){nt.addEventListener("click",function(){nl.classList.toggle("open");});
+    nl.addEventListener("click",function(e){if(e.target.closest("a"))nl.classList.remove("open");});}
+  var cb=document.getElementById("ctaBand");if(cb)cb.href=waHref();
+  var cl=document.getElementById("comboLink");if(cl)cl.href=waHref("Plataforma completa (4 módulos)");
+
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("in");io.unobserve(en.target);}});},{threshold:.12});
+    document.querySelectorAll(".reveal").forEach(function(el){io.observe(el);});
+  }else{document.querySelectorAll(".reveal").forEach(function(el){el.classList.add("in");});}
+})();
+</script>
+</body>
+</html>

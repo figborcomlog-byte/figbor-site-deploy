@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A1F44">
+<title>FIGBOR — Estoque &amp; WMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="figbor-core.css">
+<style>
+  .tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{border:0;background:transparent;color:var(--page-sub);font:inherit;font-size:13.5px;font-weight:600;padding:8px 13px;border-radius:9px;cursor:pointer}
+  .tab:hover,.tab.active{color:var(--page-fg);background:var(--chip-bg)}
+  .view{display:none}.view.active{display:block}
+  .kpis6{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+  @media(max-width:1100px){.kpis6{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.kpis6{grid-template-columns:repeat(2,1fr)}}
+  /* destaques FEFO */
+  :root{--fefo-blue:#3D82D6;--fefo-orange:#E8843A}
+  .fefo-first{background:color-mix(in srgb,var(--fefo-orange) 12%,transparent)!important}
+  .fefo-first td:first-child{box-shadow:inset 3px 0 0 var(--fefo-orange)}
+  .pill1st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:var(--fefo-orange);padding:2px 8px;border-radius:999px}
+  .fefo-group{border:1px solid var(--card-line);border-radius:14px;background:var(--card-bg);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+  .fefo-group .fgh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--card-line);flex-wrap:wrap}
+  .fefo-group .fgh h4{margin:0;font-size:14.5px;font-weight:750}
+  .fefo-group .fgh .fgs{font-size:12px;color:var(--page-sub)}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:middle}
+  .lgd{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--page-sub);align-items:center}
+  .lgd span{display:inline-flex;align-items:center;gap:6px}
+  .kpi.blue .rail{background:var(--fefo-blue)} .kpi.blue .val{color:var(--fefo-blue)}
+  .kpi.orange .rail{background:var(--fefo-orange)} .kpi.orange .val{color:var(--fefo-orange)}
+  .num.pos{color:var(--ok)} .num.neg{color:var(--danger)}
+  @media print{.fig-top,.tabs,.pagehead .ha,.toolbar,footer,.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div id="figChrome"></div>
+
+<main>
+  <div class="wrap">
+    <div class="pagehead"><div class="ht"><h1>Estoque &amp; WMS</h1><p>Gestão de validade (FEFO), posições de armazém, recebimento, inventário, separação e movimentações. Dados de demonstração — SEMALO Alimentos.</p></div>
+      <div class="ha"><button class="btn" id="btnExpTudo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar estoque</span></button>
+        <button class="btn primary" id="btnNovaMov">+ Movimentação</button></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="painel">Painel</button>
+      <button class="tab" data-view="recebimento">Recebimento</button>
+      <button class="tab" data-view="estoque">Estoque</button>
+      <button class="tab" data-view="inventario">Inventário</button>
+      <button class="tab" data-view="expedicao">Expedição</button>
+      <button class="tab" data-view="movimentacoes">Movimentações</button>
+    </div>
+
+    <!-- ============ PAINEL ============ -->
+    <section class="view active" id="view-painel">
+      <div class="kpis6" id="kpiPainel"></div>
+      <div class="grid2 mt16">
+        <div class="card"><div class="ch"><h3>Estoque por depósito / filial</h3><span class="hint">saldo em unidades</span></div>
+          <div class="cb"><div class="bars" id="barsDep"></div></div>
+        </div>
+        <div class="card"><div class="ch"><h3>Distribuição por faixa de validade</h3><span class="hint">lotes ativos</span></div>
+          <div class="cb"><div class="bars" id="barsFaixa"></div></div>
+        </div>
+      </div>
+      <div class="card mt16"><div class="ch"><h3>Prioridade — validade &amp; expedição</h3><span class="hint">FEFO · primeiro a vencer, primeiro a sair</span></div>
+        <div class="cb" style="padding:0 0 6px"><div class="tblwrap" style="border:0;box-shadow:none;border-radius:0">
+          <table><thead><tr><th>Produto</th><th>Lote</th><th>Depósito</th><th>Validade</th><th class="num">Dias</th><th>Faixa</th><th class="num">Saldo</th></tr></thead>
+          <tbody id="prioBody"></tbody></table>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ RECEBIMENTO ============ -->
+    <section class="view" id="view-recebimento">
+      <div class="kpis" id="kpiReceb"></div>
+      <div class="toolbar mt16">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qReceb" placeholder="Buscar NF, fornecedor, produto…"></div>
+        <select id="fRecStatus"><option value="">Todos os status</option><option value="pendente">Pendente</option><option value="conferido">Conferido</option><option value="divergencia">Divergência</option></select>
+        <span class="muted" id="recCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>NF</th><th>Fornecedor</th><th>Produto</th><th class="num">Qtd</th><th>Depósito</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody id="recBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ ESTOQUE ============ -->
+    <section class="view" id="view-estoque">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qEst" placeholder="Buscar produto, SKU, lote…"></div>
+        <select id="fEstDep"><option value="">Todos os depósitos</option></select>
+        <select id="fEstFaixa"><option value="">Todas as faixas</option><option value="vencido">Vencido</option><option value="critico">Crítico (≤30d)</option><option value="atencao">Atenção (≤90d)</option><option value="vigiar">Vigiar (≤180d)</option><option value="ok">OK (&gt;180d)</option></select>
+        <button class="btn" id="btnExpEst"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="estCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="lgd" style="margin-bottom:12px"><span><span class="dot" style="background:var(--danger)"></span>Vencido / Crítico</span><span><span class="dot" style="background:var(--warn)"></span>Atenção</span><span><span class="dot" style="background:var(--info)"></span>Vigiar</span><span><span class="dot" style="background:var(--ok)"></span>OK</span></div>
+      <div class="tblwrap"><table><thead><tr><th>Produto</th><th>SKU</th><th>Lote</th><th>Depósito</th><th class="num">Saldo</th><th>Validade</th><th class="num">Dias</th><th>Faixa</th><th class="num">Valor</th></tr></thead><tbody id="estBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ INVENTÁRIO ============ -->
+    <section class="view" id="view-inventario">
+      <div class="kpis" id="kpiInv"></div>
+      <div class="toolbar mt16">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qInv" placeholder="Buscar produto, lote, depósito…"></div>
+        <span class="muted" id="invCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Data</th><th>Depósito</th><th>Produto</th><th>Lote</th><th class="num">Sistema</th><th class="num">Contado</th><th class="num">Divergência</th><th></th></tr></thead><tbody id="invBody"></tbody></table></div>
+    </section>
+
+    <!-- ============ EXPEDIÇÃO ============ -->
+    <section class="view" id="view-expedicao">
+      <div class="pagehead" style="margin:0 0 12px"><div class="ht"><h1 style="font-size:17px">Separação FEFO</h1><p style="font-size:12.5px">Ordem sugerida de saída por lote — o primeiro a vencer sai primeiro (destaque laranja).</p></div>
+        <div class="ha"><button class="btn" id="btnRomaneio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg><span>Imprimir romaneio</span></button></div>
+      </div>
+      <div id="fefoGroups"></div>
+      <div class="card mt16"><div class="ch"><h3>Pedidos a expedir</h3><span class="hint" id="expHint"></span></div>
+        <div class="cb" style="padding:0 0 6px"><div class="tblwrap" style="border:0;box-shadow:none;border-radius:0">
+          <table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th class="num">Qtd</th><th>Depósito</th><th>Status</th><th></th></tr></thead><tbody id="expBody"></tbody></table>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ MOVIMENTAÇÕES ============ -->
+    <section class="view" id="view-movimentacoes">
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="qMov" placeholder="Buscar produto, lote, operador…"></div>
+        <select id="fMovTipo"><option value="">Todos os tipos</option><option value="entrada">Entrada</option><option value="saida">Saída</option><option value="perda">Perda</option><option value="ajuste">Ajuste</option></select>
+        <button class="btn" id="btnExpMov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg><span>Exportar</span></button>
+        <span class="muted" id="movCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>Data / hora</th><th>Tipo</th><th>Produto</th><th>Lote</th><th class="num">Qtd</th><th class="num">Saldo</th><th>Operador</th><th>Obs.</th></tr></thead><tbody id="movBody"></tbody></table></div>
+    </section>
+
+  </div>
+</main>
+<footer class="fig-foot"><div class="wrap"><b>FIGBOR · Estoque &amp; WMS</b> — ambiente de demonstração · SEMALO Alimentos · dados locais neste navegador.</div></footer>
+
+<!-- MODAL nova movimentação -->
+<div class="overlay" id="mdMov"><div class="modal"><div class="mh"><h3>Nova movimentação</h3><button class="xbtn" data-close="mdMov">×</button></div>
+  <div class="mb"><div class="formgrid">
+    <div class="field"><label>Tipo <span class="req">*</span></label><select id="m_tipo"><option value="entrada">Entrada</option><option value="saida">Saída</option><option value="perda">Perda</option><option value="ajuste">Ajuste</option></select></div>
+    <div class="field"><label>Depósito</label><select id="m_dep"></select></div>
+    <div class="field full"><label>Produto <span class="req">*</span></label><input id="m_prod" placeholder="Ex.: Ketchup 1,01kg"></div>
+    <div class="field"><label>Lote</label><input id="m_lote" placeholder="Ex.: L-2607A"></div>
+    <div class="field"><label>Quantidade <span class="req">*</span></label><input id="m_qtd" type="number" step="1" placeholder="0"></div>
+    <div class="field full"><label>Observação</label><textarea id="m_obs" placeholder="Motivo / referência…"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" data-close="mdMov">Cancelar</button><button class="btn primary" id="btnSaveMov">Registrar</button></div>
+</div></div>
+
+<script src="figbor-core.js"></script>
+<script>
+(function(){
+  "use strict";
+  var STORE=FIG.data("estoque");
+  var db=null;
+
+  var DEPOTS=["2-MS/MTZ","12-FILIAL PR","10-FILIAL DF","6-FILIAL RS","SP-FILIAL SP"];
+  var PRODUTOS=[
+    {nome:"Molho de Tomate 340g",sku:"SEM-MT340",custo:2.15},
+    {nome:"Maionese 3kg",sku:"SEM-MA3K",custo:11.80},
+    {nome:"Ketchup 1,01kg",sku:"SEM-KT101",custo:6.40},
+    {nome:"Mostarda 200g",sku:"SEM-MO200",custo:2.05},
+    {nome:"Extrato de Tomate 4,1kg",sku:"SEM-EX41",custo:14.60},
+    {nome:"Vinagre 750ml",sku:"SEM-VN750",custo:1.75},
+    {nome:"Barbecue 400g",sku:"SEM-BQ400",custo:4.90},
+    {nome:"Shoyu 500ml",sku:"SEM-SH500",custo:3.60}
+  ];
+  function skuOf(n){for(var i=0;i<PRODUTOS.length;i++)if(PRODUTOS[i].nome===n)return PRODUTOS[i].sku;return "—";}
+  function custoOf(n){for(var i=0;i<PRODUTOS.length;i++)if(PRODUTOS[i].nome===n)return PRODUTOS[i].custo;return 0;}
+
+  function di(off){var t=FIG.today0();var x=new Date(t);x.setDate(x.getDate()+off);return FIG.iso(x);}
+
+  // faixa por dias até vencer
+  function faixa(dias){
+    if(dias<0)return {k:"vencido",lab:"Vencido",cls:"danger"};
+    if(dias<=30)return {k:"critico",lab:"Crítico",cls:"danger"};
+    if(dias<=90)return {k:"atencao",lab:"Atenção",cls:"warn"};
+    if(dias<=180)return {k:"vigiar",lab:"Vigiar",cls:"info"};
+    return {k:"ok",lab:"OK",cls:"ok"};
+  }
+  function diasDe(validade){return FIG.diffDays(FIG.parseDate(validade),FIG.today0());}
+
+  function seed(){
+    // ---- posições de estoque (lotes) ----
+    var estoque=[
+      {id:"e1",prod:"Molho de Tomate 340g",lote:"L-2609A",dep:"2-MS/MTZ",saldo:8420,validade:di(41)},
+      {id:"e2",prod:"Molho de Tomate 340g",lote:"L-2611B",dep:"12-FILIAL PR",saldo:5210,validade:di(118)},
+      {id:"e3",prod:"Maionese 3kg",lote:"L-MA-071",dep:"2-MS/MTZ",saldo:640,validade:di(12)},
+      {id:"e4",prod:"Maionese 3kg",lote:"L-MA-088",dep:"10-FILIAL DF",saldo:1180,validade:di(74)},
+      {id:"e5",prod:"Ketchup 1,01kg",lote:"L-2607A",dep:"2-MS/MTZ",saldo:3260,validade:di(-4)},
+      {id:"e6",prod:"Ketchup 1,01kg",lote:"L-2612C",dep:"6-FILIAL RS",saldo:2740,validade:di(96)},
+      {id:"e7",prod:"Ketchup 1,01kg",lote:"L-2701A",dep:"12-FILIAL PR",saldo:4120,validade:di(203)},
+      {id:"e8",prod:"Mostarda 200g",lote:"L-MO-045",dep:"10-FILIAL DF",saldo:2980,validade:di(27)},
+      {id:"e9",prod:"Extrato de Tomate 4,1kg",lote:"L-EX-210",dep:"2-MS/MTZ",saldo:910,validade:di(58)},
+      {id:"e10",prod:"Extrato de Tomate 4,1kg",lote:"L-EX-233",dep:"SP-FILIAL SP",saldo:1360,validade:di(151)},
+      {id:"e11",prod:"Vinagre 750ml",lote:"L-VN-118",dep:"6-FILIAL RS",saldo:6740,validade:di(84)},
+      {id:"e12",prod:"Vinagre 750ml",lote:"L-VN-126",dep:"12-FILIAL PR",saldo:5180,validade:di(240)},
+      {id:"e13",prod:"Barbecue 400g",lote:"L-BQ-060",dep:"SP-FILIAL SP",saldo:1720,validade:di(19)},
+      {id:"e14",prod:"Barbecue 400g",lote:"L-BQ-072",dep:"10-FILIAL DF",saldo:2210,validade:di(133)},
+      {id:"e15",prod:"Shoyu 500ml",lote:"L-SH-031",dep:"6-FILIAL RS",saldo:0,validade:di(64)},
+      {id:"e16",prod:"Shoyu 500ml",lote:"L-SH-044",dep:"2-MS/MTZ",saldo:3410,validade:di(172)},
+      {id:"e17",prod:"Molho de Tomate 340g",lote:"L-2606X",dep:"10-FILIAL DF",saldo:1290,validade:di(8)},
+      {id:"e18",prod:"Maionese 3kg",lote:"L-MA-101",dep:"12-FILIAL PR",saldo:0,validade:di(146)}
+    ];
+    // ---- recebimentos ----
+    var receb=[
+      {id:"r1",nf:"NF-84210",forn:"Cooperativa Agroindustrial Vale",prod:"Molho de Tomate 340g",qtd:6000,dep:"2-MS/MTZ",data:di(0),status:"pendente"},
+      {id:"r2",nf:"NF-84211",forn:"Embalagens Rio Verde Ltda",prod:"Maionese 3kg",qtd:900,dep:"10-FILIAL DF",data:di(0),status:"pendente"},
+      {id:"r3",nf:"NF-84195",forn:"Distribuidora Paranaense S.A.",prod:"Ketchup 1,01kg",qtd:2400,dep:"12-FILIAL PR",data:di(0),status:"conferido"},
+      {id:"r4",nf:"NF-84188",forn:"Vinícola do Sul Insumos",prod:"Vinagre 750ml",qtd:5000,dep:"6-FILIAL RS",data:di(-1),status:"conferido"},
+      {id:"r5",nf:"NF-84176",forn:"Tomates Goiás Cooperados",prod:"Extrato de Tomate 4,1kg",qtd:1200,dep:"2-MS/MTZ",data:di(-1),status:"divergencia"},
+      {id:"r6",nf:"NF-84160",forn:"Condimentos Nordeste Ltda",prod:"Mostarda 200g",qtd:3000,dep:"10-FILIAL DF",data:di(-2),status:"conferido"},
+      {id:"r7",nf:"NF-84152",forn:"Distribuidora Paranaense S.A.",prod:"Barbecue 400g",qtd:2000,dep:"SP-FILIAL SP",data:di(-2),status:"pendente"},
+      {id:"r8",nf:"NF-84140",forn:"Insumos Oriente Importadora",prod:"Shoyu 500ml",qtd:3500,dep:"2-MS/MTZ",data:di(-3),status:"conferido"},
+      {id:"r9",nf:"NF-84131",forn:"Cooperativa Agroindustrial Vale",prod:"Molho de Tomate 340g",qtd:5200,dep:"12-FILIAL PR",data:di(-3),status:"divergencia"},
+      {id:"r10",nf:"NF-84120",forn:"Embalagens Rio Verde Ltda",prod:"Ketchup 1,01kg",qtd:4100,dep:"6-FILIAL RS",data:di(-4),status:"conferido"},
+      {id:"r11",nf:"NF-84098",forn:"Vinícola do Sul Insumos",prod:"Vinagre 750ml",qtd:5100,dep:"12-FILIAL PR",data:di(-5),status:"conferido"},
+      {id:"r12",nf:"NF-84077",forn:"Condimentos Nordeste Ltda",prod:"Maionese 3kg",qtd:1200,dep:"2-MS/MTZ",data:di(-5),status:"pendente"}
+    ];
+    // ---- inventário ----
+    var inv=[
+      {id:"i1",data:di(-1),dep:"2-MS/MTZ",prod:"Ketchup 1,01kg",lote:"L-2607A",sistema:3300,contado:3260},
+      {id:"i2",data:di(-1),dep:"2-MS/MTZ",prod:"Maionese 3kg",lote:"L-MA-071",sistema:640,contado:640},
+      {id:"i3",data:di(-1),dep:"12-FILIAL PR",prod:"Molho de Tomate 340g",lote:"L-2611B",sistema:5180,contado:5210},
+      {id:"i4",data:di(-2),dep:"10-FILIAL DF",prod:"Mostarda 200g",lote:"L-MO-045",sistema:3000,contado:2980},
+      {id:"i5",data:di(-2),dep:"6-FILIAL RS",prod:"Vinagre 750ml",lote:"L-VN-118",sistema:6740,contado:6740},
+      {id:"i6",data:di(-2),dep:"SP-FILIAL SP",prod:"Extrato de Tomate 4,1kg",lote:"L-EX-233",sistema:1360,contado:1352},
+      {id:"i7",data:di(-3),dep:"10-FILIAL DF",prod:"Barbecue 400g",lote:"L-BQ-072",sistema:2200,contado:2210},
+      {id:"i8",data:di(-3),dep:"2-MS/MTZ",prod:"Shoyu 500ml",lote:"L-SH-044",sistema:3410,contado:3410},
+      {id:"i9",data:di(-4),dep:"6-FILIAL RS",prod:"Ketchup 1,01kg",lote:"L-2612C",sistema:2760,contado:2740},
+      {id:"i10",data:di(-4),dep:"SP-FILIAL SP",prod:"Barbecue 400g",lote:"L-BQ-060",sistema:1700,contado:1720},
+      {id:"i11",data:di(-5),dep:"12-FILIAL PR",prod:"Ketchup 1,01kg",lote:"L-2701A",sistema:4120,contado:4120},
+      {id:"i12",data:di(-6),dep:"2-MS/MTZ",prod:"Extrato de Tomate 4,1kg",lote:"L-EX-210",sistema:930,contado:910}
+    ];
+    // ---- pedidos a expedir ----
+    var exp=[
+      {id:"x1",pedido:"PV-33012",cli:"Atacadão Centro-Oeste",prod:"Ketchup 1,01kg",qtd:800,dep:"2-MS/MTZ",status:"separar"},
+      {id:"x2",pedido:"PV-33013",cli:"Rede Supermercados Bom Preço",prod:"Molho de Tomate 340g",qtd:2400,dep:"2-MS/MTZ",status:"separar"},
+      {id:"x3",pedido:"PV-33009",cli:"Distribuidora Curitibana",prod:"Vinagre 750ml",qtd:1800,dep:"12-FILIAL PR",status:"separado"},
+      {id:"x4",pedido:"PV-33001",cli:"Comercial Gaúcha Alimentos",prod:"Ketchup 1,01kg",qtd:1200,dep:"6-FILIAL RS",status:"separado"},
+      {id:"x5",pedido:"PV-32988",cli:"Mercado União Brasília",prod:"Mostarda 200g",qtd:1500,dep:"10-FILIAL DF",status:"expedido"},
+      {id:"x6",pedido:"PV-33020",cli:"Atacado São Paulo Norte",prod:"Barbecue 400g",qtd:600,dep:"SP-FILIAL SP",status:"separar"},
+      {id:"x7",pedido:"PV-33018",cli:"Rede Supermercados Bom Preço",prod:"Maionese 3kg",qtd:300,dep:"10-FILIAL DF",status:"separar"},
+      {id:"x8",pedido:"PV-33005",cli:"Distribuidora Curitibana",prod:"Molho de Tomate 340g",qtd:3000,dep:"12-FILIAL PR",status:"separado"},
+      {id:"x9",pedido:"PV-32995",cli:"Comercial Gaúcha Alimentos",prod:"Shoyu 500ml",qtd:900,dep:"2-MS/MTZ",status:"expedido"},
+      {id:"x10",pedido:"PV-33022",cli:"Atacadão Centro-Oeste",prod:"Extrato de Tomate 4,1kg",qtd:400,dep:"2-MS/MTZ",status:"separar"}
+    ];
+    // ---- movimentações ----
+    function ts(offDays,h,m){var t=FIG.today0();var x=new Date(t);x.setDate(x.getDate()+offDays);x.setHours(h,m,0,0);return x.toISOString();}
+    var mov=[
+      {id:"v1",ts:ts(0,8,12),tipo:"entrada",prod:"Ketchup 1,01kg",lote:"L-2612C",qtd:2400,saldo:2740,operador:"Rafael Nogueira",obs:"NF-84195"},
+      {id:"v2",ts:ts(0,9,3),tipo:"saida",prod:"Molho de Tomate 340g",lote:"L-2609A",qtd:-1200,saldo:8420,operador:"Juliana Prado",obs:"PV-33013 parcial"},
+      {id:"v3",ts:ts(0,10,41),tipo:"ajuste",prod:"Extrato de Tomate 4,1kg",lote:"L-EX-233",qtd:-8,saldo:1352,operador:"Marcos Vinícius",obs:"Inventário cíclico"},
+      {id:"v4",ts:ts(-1,7,55),tipo:"entrada",prod:"Vinagre 750ml",lote:"L-VN-118",qtd:5000,saldo:6740,operador:"Rafael Nogueira",obs:"NF-84188"},
+      {id:"v5",ts:ts(-1,11,20),tipo:"perda",prod:"Maionese 3kg",lote:"L-MA-071",qtd:-24,saldo:640,operador:"Camila Ferreira",obs:"Avaria no transporte"},
+      {id:"v6",ts:ts(-1,14,8),tipo:"saida",prod:"Ketchup 1,01kg",lote:"L-2607A",qtd:-540,saldo:3260,operador:"Juliana Prado",obs:"PV-33001"},
+      {id:"v7",ts:ts(-2,8,30),tipo:"entrada",prod:"Mostarda 200g",lote:"L-MO-045",qtd:3000,saldo:2980,operador:"Rafael Nogueira",obs:"NF-84160"},
+      {id:"v8",ts:ts(-2,16,45),tipo:"saida",prod:"Barbecue 400g",lote:"L-BQ-060",qtd:-300,saldo:1720,operador:"André Luiz",obs:"PV-33020"},
+      {id:"v9",ts:ts(-3,9,15),tipo:"entrada",prod:"Shoyu 500ml",lote:"L-SH-044",qtd:3500,saldo:3410,operador:"Camila Ferreira",obs:"NF-84140"},
+      {id:"v10",ts:ts(-3,13,2),tipo:"perda",prod:"Ketchup 1,01kg",lote:"L-2607A",qtd:-40,saldo:3300,operador:"Marcos Vinícius",obs:"Vencimento próximo — descarte"},
+      {id:"v11",ts:ts(-4,10,50),tipo:"saida",prod:"Vinagre 750ml",lote:"L-VN-118",qtd:-260,saldo:6740,operador:"André Luiz",obs:"PV-32988"},
+      {id:"v12",ts:ts(-4,15,36),tipo:"ajuste",prod:"Ketchup 1,01kg",lote:"L-2612C",qtd:-20,saldo:2740,operador:"Marcos Vinícius",obs:"Conferência de recebimento"},
+      {id:"v13",ts:ts(-5,8,5),tipo:"entrada",prod:"Molho de Tomate 340g",lote:"L-2611B",qtd:5200,saldo:5210,operador:"Rafael Nogueira",obs:"NF-84131"},
+      {id:"v14",ts:ts(-5,17,10),tipo:"saida",prod:"Maionese 3kg",lote:"L-MA-088",qtd:-180,saldo:1180,operador:"Juliana Prado",obs:"PV-32995"}
+    ];
+    return {estoque:estoque,receb:receb,inv:inv,exp:exp,mov:mov};
+  }
+  function save(){STORE.set(db);}
+
+  function badge(cls,txt){return '<span class="badge '+cls+'">'+FIG.esc(txt)+'</span>';}
+
+  /* ===================== PAINEL ===================== */
+  function renderPainel(){
+    var ativos=db.estoque.filter(function(e){return e.saldo>0;});
+    var totItens=ativos.length;
+    var valor=ativos.reduce(function(s,e){return s+e.saldo*custoOf(e.prod);},0);
+    var hoje=di(0);
+    var receberHoje=db.receb.filter(function(r){return r.data===hoje;}).reduce(function(s,r){return s+r.qtd;},0);
+    var expedirHoje=db.exp.filter(function(x){return x.status!=="expedido";}).reduce(function(s,x){return s+x.qtd;},0);
+    var venc90=ativos.filter(function(e){var d=diasDe(e.validade);return d>=0&&d<=90;}).length;
+    var rupturas=db.estoque.filter(function(e){return e.saldo===0;}).length;
+    var totUn=ativos.reduce(function(s,e){return s+e.saldo;},0);
+
+    var kpis=[
+      {lab:"Itens em estoque",val:FIG.nf(totItens),cap:FIG.nf(totUn)+" un no total",cls:"blue"},
+      {lab:"Valor do estoque",val:FIG.brl(valor),cap:"custo de reposição",cls:"ok"},
+      {lab:"A receber hoje",val:FIG.nf(receberHoje),cap:db.receb.filter(function(r){return r.data===hoje;}).length+" NF(s)",cls:"info"},
+      {lab:"A expedir hoje",val:FIG.nf(expedirHoje),cap:db.exp.filter(function(x){return x.status!=="expedido";}).length+" pedido(s)",cls:"orange"},
+      {lab:"Vencendo até 90d",val:FIG.nf(venc90),cap:"lotes em atenção",cls:"warn"},
+      {lab:"Rupturas",val:FIG.nf(rupturas),cap:"SKUs zerados",cls:"danger"}
+    ];
+    document.getElementById("kpiPainel").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+
+    // barras por depósito
+    var byDep={};DEPOTS.forEach(function(d){byDep[d]=0;});
+    ativos.forEach(function(e){byDep[e.dep]=(byDep[e.dep]||0)+e.saldo;});
+    var maxD=Math.max.apply(null,DEPOTS.map(function(d){return byDep[d];}).concat([1]));
+    document.getElementById("barsDep").innerHTML=DEPOTS.map(function(d){
+      return '<div class="bar"><span class="bl">'+FIG.esc(d)+'</span><span class="bt"><span class="bf" style="width:'+Math.round(byDep[d]/maxD*100)+'%;background:var(--fefo-blue)"></span></span><span class="bn">'+FIG.nf(byDep[d])+'</span></div>';
+    }).join("");
+
+    // barras por faixa
+    var fc={vencido:0,critico:0,atencao:0,vigiar:0,ok:0};
+    ativos.forEach(function(e){fc[faixa(diasDe(e.validade)).k]++;});
+    var fmap=[["vencido","Vencido","danger"],["critico","Crítico ≤30d","danger"],["atencao","Atenção ≤90d","warn"],["vigiar","Vigiar ≤180d","info"],["ok","OK >180d","ok"]];
+    var maxF=Math.max.apply(null,fmap.map(function(f){return fc[f[0]];}).concat([1]));
+    document.getElementById("barsFaixa").innerHTML=fmap.map(function(f){
+      return '<div class="bar"><span class="bl">'+f[1]+'</span><span class="bt"><span class="bf" style="width:'+Math.round(fc[f[0]]/maxF*100)+'%;background:var(--'+f[2]+')"></span></span><span class="bn">'+fc[f[0]]+'</span></div>';
+    }).join("");
+
+    // prioridade
+    var pri=ativos.slice().sort(function(a,b){return diasDe(a.validade)-diasDe(b.validade);}).slice(0,10);
+    document.getElementById("prioBody").innerHTML=pri.map(function(e){
+      var d=diasDe(e.validade),fx=faixa(d);
+      return '<tr><td class="prod">'+FIG.esc(e.prod)+'</td><td class="mono">'+FIG.esc(e.lote)+'</td><td>'+FIG.esc(e.dep)+'</td><td>'+FIG.fmt(e.validade)+'</td><td class="num">'+d+'</td><td>'+badge(fx.cls,fx.lab)+'</td><td class="num">'+FIG.nf(e.saldo)+'</td></tr>';
+    }).join("");
+  }
+
+  /* ===================== RECEBIMENTO ===================== */
+  var RSTAT={pendente:["Pendente","warn"],conferido:["Conferido","ok"],divergencia:["Divergência","danger"]};
+  function renderReceb(){
+    var q=(document.getElementById("qReceb").value||"").toLowerCase().trim();
+    var fs=document.getElementById("fRecStatus").value;
+    var hoje=di(0);
+    var kpis=[
+      {lab:"Recebimentos hoje",val:FIG.nf(db.receb.filter(function(r){return r.data===hoje;}).length),cap:"NFs do dia",cls:"info"},
+      {lab:"Pendentes",val:FIG.nf(db.receb.filter(function(r){return r.status==="pendente";}).length),cap:"aguardando conferência",cls:"warn"},
+      {lab:"Conferidos",val:FIG.nf(db.receb.filter(function(r){return r.status==="conferido";}).length),cap:"OK",cls:"ok"},
+      {lab:"Divergências",val:FIG.nf(db.receb.filter(function(r){return r.status==="divergencia";}).length),cap:"exigem tratativa",cls:"danger"}
+    ];
+    document.getElementById("kpiReceb").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+
+    var rows=db.receb.slice().sort(function(a,b){return (b.data||"").localeCompare(a.data||"");}).filter(function(r){
+      if(fs&&r.status!==fs)return false;
+      if(q){var hay=(r.nf+" "+r.forn+" "+r.prod).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("recCount").textContent=rows.length+" recebimento(s)";
+    document.getElementById("recBody").innerHTML=rows.length?rows.map(function(r){
+      var st=RSTAT[r.status];
+      var btn=r.status==="conferido"?'':'<button class="btn sm" data-conf="'+r.id+'">Conferir</button>';
+      return '<tr><td class="mono">'+FIG.esc(r.nf)+'</td><td>'+FIG.esc(r.forn)+'</td><td class="prod">'+FIG.esc(r.prod)+'</td><td class="num">'+FIG.nf(r.qtd)+'</td><td>'+FIG.esc(r.dep)+'</td><td>'+FIG.fmt(r.data)+'</td><td>'+badge(st[1],st[0])+'</td><td><div class="rowbtns">'+btn+'</div></td></tr>';
+    }).join(""):'<tr><td colspan="8"><div class="empty"><b>Nenhum recebimento</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ===================== ESTOQUE ===================== */
+  function renderEstoque(){
+    var q=(document.getElementById("qEst").value||"").toLowerCase().trim();
+    var fd=document.getElementById("fEstDep").value;
+    var ff=document.getElementById("fEstFaixa").value;
+    var rows=db.estoque.slice().filter(function(e){return e.saldo>0;}).sort(function(a,b){return diasDe(a.validade)-diasDe(b.validade);}).filter(function(e){
+      if(fd&&e.dep!==fd)return false;
+      if(ff&&faixa(diasDe(e.validade)).k!==ff)return false;
+      if(q){var hay=(e.prod+" "+skuOf(e.prod)+" "+e.lote).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("estCount").textContent=rows.length+" lote(s)";
+    document.getElementById("estBody").innerHTML=rows.length?rows.map(function(e){
+      var d=diasDe(e.validade),fx=faixa(d);
+      return '<tr><td class="prod">'+FIG.esc(e.prod)+'</td><td class="mono">'+FIG.esc(skuOf(e.prod))+'</td><td class="mono">'+FIG.esc(e.lote)+'</td><td>'+FIG.esc(e.dep)+'</td><td class="num">'+FIG.nf(e.saldo)+'</td><td>'+FIG.fmt(e.validade)+'</td><td class="num">'+d+'</td><td>'+badge(fx.cls,fx.lab)+'</td><td class="num">'+FIG.brl(e.saldo*custoOf(e.prod))+'</td></tr>';
+    }).join(""):'<tr><td colspan="9"><div class="empty"><b>Nenhum lote</b>Ajuste a busca ou os filtros.</div></td></tr>';
+  }
+
+  /* ===================== INVENTÁRIO ===================== */
+  function renderInv(){
+    var q=(document.getElementById("qInv").value||"").toLowerCase().trim();
+    var contados=db.inv.length;
+    var divs=db.inv.filter(function(r){return r.contado-r.sistema!==0;}).length;
+    var ajustes=db.inv.filter(function(r){return r.contado-r.sistema!==0;}).reduce(function(s,r){return s+Math.abs(r.contado-r.sistema);},0);
+    var totSis=db.inv.reduce(function(s,r){return s+r.sistema;},0);
+    var totDif=db.inv.reduce(function(s,r){return s+Math.abs(r.contado-r.sistema);},0);
+    var acc=totSis>0?(1-totDif/totSis)*100:100;
+    var kpis=[
+      {lab:"Acuracidade",val:acc.toFixed(1).replace(".",",")+"%",cap:"por unidade contada",cls:acc>=99?"ok":acc>=97?"warn":"danger"},
+      {lab:"Itens contados",val:FIG.nf(contados),cap:"contagens registradas",cls:"info"},
+      {lab:"Divergências",val:FIG.nf(divs),cap:"lotes com diferença",cls:divs?"warn":"ok"},
+      {lab:"Ajustes (un)",val:FIG.nf(ajustes),cap:"unidades a corrigir",cls:"blue"}
+    ];
+    document.getElementById("kpiInv").innerHTML=kpis.map(function(k){return '<div class="kpi '+k.cls+'"><span class="rail"></span><div class="lab">'+k.lab+'</div><div class="val">'+k.val+'</div><div class="cap">'+k.cap+'</div></div>';}).join("");
+
+    var rows=db.inv.slice().sort(function(a,b){return (b.data||"").localeCompare(a.data||"");}).filter(function(r){
+      if(q){var hay=(r.prod+" "+r.lote+" "+r.dep).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("invCount").textContent=rows.length+" contagem(ns)";
+    document.getElementById("invBody").innerHTML=rows.map(function(r){
+      var dif=r.contado-r.sistema;
+      var dcls=dif===0?"slate":dif>0?"ok":"danger";
+      var dtxt=(dif>0?"+":"")+FIG.nf(dif);
+      var acao=dif!==0?'<button class="btn sm" data-ajuste="'+r.id+'">Ajustar</button>':'<span class="tag">OK</span>';
+      return '<tr><td>'+FIG.fmt(r.data)+'</td><td>'+FIG.esc(r.dep)+'</td><td class="prod">'+FIG.esc(r.prod)+'</td><td class="mono">'+FIG.esc(r.lote)+'</td><td class="num">'+FIG.nf(r.sistema)+'</td><td class="num">'+FIG.nf(r.contado)+'</td><td class="num">'+badge(dcls,dtxt)+'</td><td><div class="rowbtns">'+acao+'</div></td></tr>';
+    }).join("");
+  }
+
+  /* ===================== EXPEDIÇÃO ===================== */
+  var XSTAT={separar:["Separar","warn"],separado:["Separado","info"],expedido:["Expedido","ok"]};
+  function renderExp(){
+    // agrupa lotes ativos por produto, ordena FEFO
+    var byProd={};
+    db.estoque.filter(function(e){return e.saldo>0;}).forEach(function(e){(byProd[e.prod]=byProd[e.prod]||[]).push(e);});
+    var prods=Object.keys(byProd).sort();
+    // prioriza produtos com pedidos a separar; senão mostra todos
+    var withDemand=prods.filter(function(p){return db.exp.some(function(x){return x.prod===p&&x.status!=="expedido";});});
+    var showProds=withDemand.length?withDemand:prods.slice(0,6);
+    var html=showProds.map(function(p){
+      var lotes=byProd[p].slice().sort(function(a,b){return diasDe(a.validade)-diasDe(b.validade);});
+      var demand=db.exp.filter(function(x){return x.prod===p&&x.status!=="expedido";}).reduce(function(s,x){return s+x.qtd;},0);
+      var rows=lotes.map(function(e,ix){
+        var d=diasDe(e.validade),fx=faixa(d);
+        var first=ix===0;
+        return '<tr class="'+(first?"fefo-first":"")+'"><td>'+(first?'<span class="pill1st">1ª saída</span>':'<span class="tag">'+(ix+1)+'ª</span>')+'</td><td class="mono">'+FIG.esc(e.lote)+'</td><td>'+FIG.esc(e.dep)+'</td><td>'+FIG.fmt(e.validade)+'</td><td class="num">'+d+'</td><td>'+badge(fx.cls,fx.lab)+'</td><td class="num">'+FIG.nf(e.saldo)+'</td></tr>';
+      }).join("");
+      return '<div class="fefo-group"><div class="fgh"><h4>'+FIG.esc(p)+' <span class="mono muted">· '+FIG.esc(skuOf(p))+'</span></h4><span class="fgs">Demanda a separar: <b>'+FIG.nf(demand)+'</b> un · '+lotes.length+' lote(s)</span></div>'+
+        '<div class="tblwrap" style="border:0;box-shadow:none;border-radius:0"><table><thead><tr><th>Ordem</th><th>Lote</th><th>Depósito</th><th>Validade</th><th class="num">Dias</th><th>Faixa</th><th class="num">Saldo</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+    }).join("");
+    document.getElementById("fefoGroups").innerHTML=html;
+
+    document.getElementById("expBody").innerHTML=db.exp.slice().map(function(x){
+      var st=XSTAT[x.status];
+      return '<tr><td class="mono">'+FIG.esc(x.pedido)+'</td><td class="prod">'+FIG.esc(x.cli)+'</td><td>'+FIG.esc(x.prod)+'</td><td class="num">'+FIG.nf(x.qtd)+'</td><td>'+FIG.esc(x.dep)+'</td><td>'+badge(st[1],st[0])+'</td><td><div class="rowbtns">'+(x.status==="expedido"?'<span class="tag">Concluído</span>':'<button class="btn sm" data-sep="'+x.id+'">Avançar</button>')+'</div></td></tr>';
+    }).join("");
+    var aSep=db.exp.filter(function(x){return x.status!=="expedido";}).length;
+    document.getElementById("expHint").textContent=aSep+" pedido(s) em aberto · "+db.exp.length+" no total";
+  }
+
+  /* ===================== MOVIMENTAÇÕES ===================== */
+  var MTIPO={entrada:["Entrada","ok"],saida:["Saída","info"],perda:["Perda","danger"],ajuste:["Ajuste","violet"]};
+  function renderMov(){
+    var q=(document.getElementById("qMov").value||"").toLowerCase().trim();
+    var ft=document.getElementById("fMovTipo").value;
+    var rows=db.mov.slice().sort(function(a,b){return (b.ts||"").localeCompare(a.ts||"");}).filter(function(m){
+      if(ft&&m.tipo!==ft)return false;
+      if(q){var hay=(m.prod+" "+m.lote+" "+m.operador+" "+(m.obs||"")).toLowerCase();if(hay.indexOf(q)<0)return false;}
+      return true;
+    });
+    document.getElementById("movCount").textContent=rows.length+" movimentação(ões)";
+    document.getElementById("movBody").innerHTML=rows.length?rows.map(function(m){
+      var t=MTIPO[m.tipo];
+      var qcls=m.qtd>=0?"pos":"neg";
+      var qtxt=(m.qtd>0?"+":"")+FIG.nf(m.qtd);
+      return '<tr><td>'+FIG.fmtDT(m.ts)+'</td><td>'+badge(t[1],t[0])+'</td><td class="prod">'+FIG.esc(m.prod)+'</td><td class="mono">'+FIG.esc(m.lote)+'</td><td class="num '+qcls+'">'+qtxt+'</td><td class="num">'+FIG.nf(m.saldo)+'</td><td>'+FIG.esc(m.operador)+'</td><td class="muted">'+FIG.esc(m.obs||"—")+'</td></tr>';
+    }).join(""):'<tr><td colspan="8"><div class="empty"><b>Nenhuma movimentação</b>Ajuste os filtros.</div></td></tr>';
+  }
+
+  /* ===================== RENDER GERAL ===================== */
+  function render(){renderPainel();renderReceb();renderEstoque();renderInv();renderExp();renderMov();save();}
+
+  /* ===================== NOVA MOVIMENTAÇÃO ===================== */
+  function openMov(){
+    document.getElementById("m_dep").innerHTML=DEPOTS.map(function(d){return '<option value="'+FIG.esc(d)+'">'+FIG.esc(d)+'</option>';}).join("");
+    document.getElementById("m_tipo").value="entrada";document.getElementById("m_prod").value="";document.getElementById("m_lote").value="";document.getElementById("m_qtd").value="";document.getElementById("m_obs").value="";
+    FIG.openModal("mdMov");
+  }
+  function saveMov(){
+    var prod=document.getElementById("m_prod").value.trim();
+    var qtd=Number(document.getElementById("m_qtd").value);
+    if(!prod){alert("Informe o produto.");return;}
+    if(!qtd){alert("Informe a quantidade.");return;}
+    var tipo=document.getElementById("m_tipo").value;
+    var sign=(tipo==="saida"||tipo==="perda")?-1:1;
+    var q=sign*Math.abs(qtd);
+    db.mov.unshift({id:FIG.uid("v"),ts:FIG.nowStamp(),tipo:tipo,prod:prod,lote:document.getElementById("m_lote").value.trim()||"—",qtd:q,saldo:Math.abs(q),operador:(FIG.auth.currentUser()||{}).nome||"Operador",obs:document.getElementById("m_obs").value.trim()});
+    FIG.closeModal("mdMov");render();FIG.toast("Movimentação registrada.");
+  }
+
+  /* ===================== WIRING ===================== */
+  function wire(){
+    document.getElementById("tabs").addEventListener("click",function(e){var t=e.target.closest(".tab");if(!t)return;
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});document.querySelectorAll(".view").forEach(function(x){x.classList.remove("active");});
+      t.classList.add("active");document.getElementById("view-"+t.getAttribute("data-view")).classList.add("active");});
+
+    // filtro depósito
+    document.getElementById("fEstDep").innerHTML='<option value="">Todos os depósitos</option>'+DEPOTS.map(function(d){return '<option value="'+FIG.esc(d)+'">'+FIG.esc(d)+'</option>';}).join("");
+
+    ["qReceb","fRecStatus"].forEach(function(i){document.getElementById(i).addEventListener("input",renderReceb);});
+    ["qEst","fEstDep","fEstFaixa"].forEach(function(i){document.getElementById(i).addEventListener("input",renderEstoque);});
+    document.getElementById("qInv").addEventListener("input",renderInv);
+    ["qMov","fMovTipo"].forEach(function(i){document.getElementById(i).addEventListener("input",renderMov);});
+
+    document.getElementById("btnNovaMov").addEventListener("click",openMov);
+    document.getElementById("btnSaveMov").addEventListener("click",saveMov);
+    document.getElementById("btnRomaneio").addEventListener("click",function(){FIG.toast("Gerando romaneio de separação…");setTimeout(function(){window.print();},350);});
+
+    document.getElementById("btnExpTudo").addEventListener("click",exportEstoque);
+    document.getElementById("btnExpEst").addEventListener("click",exportEstoque);
+    document.getElementById("btnExpMov").addEventListener("click",function(){
+      FIG.downloadCSV("figbor-estoque-movimentacoes-"+FIG.iso(FIG.today0())+".csv",["data","tipo","produto","lote","qtd","saldo","operador","obs"],
+        db.mov.map(function(m){return {data:FIG.fmtDT(m.ts),tipo:(MTIPO[m.tipo]||[])[0],produto:m.prod,lote:m.lote,qtd:m.qtd,saldo:m.saldo,operador:m.operador,obs:m.obs};}));
+      FIG.toast("Movimentações exportadas.");});
+
+    document.body.addEventListener("click",function(e){
+      var cf=e.target.closest("[data-conf]");if(cf){var r=db.receb.filter(function(x){return x.id===cf.getAttribute("data-conf");})[0];
+        if(r){r.status="conferido";render();FIG.toast("Recebimento "+r.nf+" conferido.");}return;}
+      var aj=e.target.closest("[data-ajuste]");if(aj){var iv=db.inv.filter(function(x){return x.id===aj.getAttribute("data-ajuste");})[0];
+        if(iv){var dif=iv.contado-iv.sistema;iv.sistema=iv.contado;
+          db.mov.unshift({id:FIG.uid("v"),ts:FIG.nowStamp(),tipo:"ajuste",prod:iv.prod,lote:iv.lote,qtd:dif,saldo:iv.contado,operador:(FIG.auth.currentUser()||{}).nome||"Operador",obs:"Ajuste de inventário — "+iv.dep});
+          render();FIG.toast("Estoque ajustado ("+(dif>0?"+":"")+dif+" un).");}return;}
+      var sp=e.target.closest("[data-sep]");if(sp){var x=db.exp.filter(function(y){return y.id===sp.getAttribute("data-sep");})[0];
+        if(x){x.status=x.status==="separar"?"separado":"expedido";render();FIG.toast("Pedido "+x.pedido+" → "+(XSTAT[x.status][0])+".");}return;}
+    });
+  }
+
+  function exportEstoque(){
+    FIG.downloadCSV("figbor-estoque-posicao-"+FIG.iso(FIG.today0())+".csv",["produto","sku","lote","deposito","saldo","validade","dias","faixa","valor"],
+      db.estoque.filter(function(e){return e.saldo>0;}).map(function(e){var d=diasDe(e.validade);return {produto:e.prod,sku:skuOf(e.prod),lote:e.lote,deposito:e.dep,saldo:e.saldo,validade:e.validade,dias:d,faixa:faixa(d).lab,valor:(e.saldo*custoOf(e.prod)).toFixed(2)};}));
+    FIG.toast("Estoque exportado.");
+  }
+
+  FIG.requireAuth(function(){
+    FIG.mountChrome({module:"estoque"});
+    db=STORE.get(null)||seed();
+    FIG.wireModals();wire();render();
+  });
+})();
+</script>
+</body>
+</html>
