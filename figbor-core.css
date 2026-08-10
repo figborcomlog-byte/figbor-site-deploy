@@ -47,11 +47,16 @@ header.fig-top{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.4) bl
 .fig-wm .wfig{color:var(--page-fg)} .fig-wm .wbor{color:#0097D6}
 .fig-brand img.mk{object-fit:contain}
 .gate .gbrand img.gate-logo{width:190px;max-width:72%;height:auto;display:block;margin:0 auto 2px}
-/* a marca vem em duas artes e o tema escolhe uma — trocar o src no clique
-   faria a marca piscar a cada troca de tema */
-.neg-art{display:none}
-html[data-theme="dark"] .dia-art{display:none}
-html[data-theme="dark"] img.neg-art{display:block}
+/* A marca vem em duas artes e o tema escolhe uma — trocar o src no clique
+   faria a marca piscar a cada troca de tema.
+   Os seletores são longos de propósito: ".gate .gbrand img.gate-logo" acima
+   já crava display:block e ganha de ".neg-art" sozinho. Com uma classe só,
+   as DUAS artes apareciam lado a lado e vazavam para fora do cartão. */
+.gate .gbrand img.neg-art,
+.fig-brand img.neg-art{display:none}
+html[data-theme="dark"] .gate .gbrand img.dia-art,
+html[data-theme="dark"] .fig-brand img.dia-art{display:none}
+html[data-theme="dark"] .gate .gbrand img.neg-art{display:block}
 html[data-theme="dark"] .fig-brand img.neg-art{display:inline-block}
 .fig-mod{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);
   border:1px solid var(--acc);border-radius:5px;padding:2px 7px}
