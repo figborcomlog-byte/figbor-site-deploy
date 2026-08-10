@@ -351,9 +351,25 @@ header{position:sticky;top:0;z-index:100;background:var(--brt);
 .nv .ent{font:500 13px/1 var(--mono);color:var(--mut);letter-spacing:.04em}
 .bg{display:none;width:42px;height:42px;border:1px solid var(--ln2);background:none;
   border-radius:4px;font-size:18px;color:var(--navy);cursor:pointer}
-.mm{display:none;border-top:1px solid var(--ln);padding:6px var(--pd) 16px}
+/* menu móvel: a lista rola se não couber (celular baixo, teclado aberto ou
+   texto ampliado), em vez de empurrar o botão para fora da tela */
+.mm{display:none;border-top:1px solid var(--ln);padding:6px var(--pd) 20px;
+  background:var(--br);max-height:calc(100vh - 74px);overflow-y:auto;overscroll-behavior:contain}
 .mm.on{display:block}
-.mm a{display:block;padding:13px 0;border-bottom:1px solid var(--ln);font:500 16px/1 var(--txt);color:var(--navy)}
+.mm a{display:block;padding:14px 0;border-bottom:1px solid var(--ln);font:500 16px/1 var(--txt);color:var(--navy)}
+.mm a:last-child{border-bottom:0}
+/* o rodapé do menu: os dois botões empilhados, com ar entre eles e a lista */
+.mm-pe{display:flex;flex-direction:column;gap:10px;margin-top:18px;padding-top:18px;
+  border-top:1px solid var(--ln)}
+/* ".mm a" tem especificidade maior que ".mm-ent" e impunha display:block —
+   com isso o gap do flex não valia e o cadeado ficava colado no texto. */
+.mm-pe a.btn{display:inline-flex;align-items:center;justify-content:center;
+  width:100%;gap:8px;padding:14px 18px;border-bottom:0}
+.mm-pe a.btn svg{width:14px;height:14px;flex:0 0 auto}
+/* a COR também precisa vencer o ".mm a": sem estas duas linhas o texto do botão
+   primário fica marinho sobre marinho — some por completo. */
+.mm-pe a.b1{color:#fff}
+.mm-pe a.b2{color:var(--navy)}
 
 /* ── hero: claim curto + tela real sangrando ── */
 .hero{padding:70px 0 26px;overflow:hidden}
@@ -573,7 +589,13 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
   <nav class="mm" id="mm" aria-label="Principal (móvel)">
     <a href="#rodando">O que roda</a><a href="#onde">Onde roda</a><a href="#calculos">Cálculos</a>
     <a href="#integra">Integração</a><a href="#metodo">Método</a><a href="#contato">Contato</a>
-    <a href="#contato" style="border-bottom:0;padding-top:16px"><span class="btn b1" style="width:100%;justify-content:center">Agendar diagnóstico</span></a>
+    <!-- Os dois botões ficam num rodapé próprio do menu. O ENTRAR precisa estar
+         AQUI: no celular ele sai da barra do topo (não cabe), e sem isto não
+         existe caminho nenhum para o sistema pelo telefone. -->
+    <div class="mm-pe">
+      <a class="btn b2 mm-ent" href="/hub/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Entrar no Portal</a>
+      <a class="btn b1" href="#contato">Agendar diagnóstico</a>
+    </div>
   </nav>
 </header>
 
