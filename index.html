@@ -217,7 +217,11 @@
   <nav class="navlinks" id="navlinks"><a href="#como">Como funciona</a><a href="#modulos">Módulos & Preços</a><a href="#dentro">Demonstração</a><a href="#recursos">Recursos</a><a href="#faq">FAQ</a></nav>
   <div class="navcta">
     <button class="tbtn" id="themeBtn" title="Alternar tema" aria-label="Alternar tema">◐</button>
-    <a class="btn ghost" href="FIGBOR.html">Entrar</a><a class="btn pri" href="#modulos">Ver planos</a>
+    <!-- ENTRAR vai para o sistema de verdade (EC2), nao para o prototipo local.
+         Sistema em subdominio proprio: o site e estatico atras do CloudFront, e
+         cache na frente de um app com cookie de sessao serve a sessao de um
+         usuario para outro. -->
+    <a class="btn ghost" href="https://fefo.figbor.com.br/">Entrar</a><a class="btn pri" href="#modulos">Ver planos</a>
     <button class="navtoggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </div></header>
@@ -322,7 +326,7 @@
     <h2>Pronto para começar?</h2>
     <p>Escolha um módulo e solicite sua proposta. Ativação rápida, sem burocracia.</p>
     <div class="cta"><a class="btn pri lg" id="ctaBand" href="#modulos">Solicitar proposta</a>
-      <a class="btn ghost lg" href="FIGBOR.html">Acessar a plataforma</a></div>
+      <a class="btn ghost lg" href="https://fefo.figbor.com.br/">Acessar a plataforma</a></div>
   </div>
 </div></section>
 
@@ -330,7 +334,9 @@
   <div class="top">
     <div class="brand" style="display:flex;align-items:center;gap:11px"><img class="mk" src="figbor-icon.png?v=4" alt="FIGBOR" style="width:40px;height:32px"><img class="wmk" src="figbor-wordmark.png?v=5" alt="FIGBOR" style="height:20px"></div>
     <div class="cols">
-      <div><b>Plataforma</b><a href="FIGBOR.html">Hub</a><a href="FIGBOR-FEFO.html">Estoque</a><a href="FIGBOR-comercial.html">Comercial</a><a href="FIGBOR-producao.html">Produção</a><a href="FIGBOR-transporte.html">Transporte</a></div>
+      <!-- Hub = o sistema de verdade. Os demais continuam nas demonstracoes
+           locais: so o Estoque/FEFO existe como app rodando. -->
+      <div><b>Plataforma</b><a href="https://fefo.figbor.com.br/">Hub</a><a href="FIGBOR-FEFO.html">Estoque</a><a href="FIGBOR-comercial.html">Comercial</a><a href="FIGBOR-producao.html">Produção</a><a href="FIGBOR-transporte.html">Transporte</a></div>
       <div><b>Site</b><a href="#como">Como funciona</a><a href="#modulos">Módulos</a><a href="#recursos">Recursos</a><a href="#faq">FAQ</a></div>
     </div>
   </div>
