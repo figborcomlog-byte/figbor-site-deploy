@@ -26,15 +26,20 @@ echo ">> 1/4 arte da marca (assets/) — cache de 1 ano ..."
 aws s3 sync ./assets "s3://$B/assets" --delete \
   --cache-control "public, max-age=31536000, immutable"
 
+# nos filtros do "aws s3 sync" vale a ÚLTIMA regra que casa. Por isso o
+# "--exclude *" vem primeiro, depois o que entra, e por último o que não entra
+# de jeito nenhum — inverter a ordem faria o --include ressuscitar o .git.
 echo ">> 2/4 paginas HTML — sempre revalidar ..."
-aws s3 sync . "s3://$B" "${COMUM[@]}" \
-  --exclude "*" --include "*.html" --exclude "assets/*" \
+aws s3 sync . "s3://$B" \
+  --exclude "*" --include "*.html" \
+  --exclude ".git/*" --exclude "assets/*" \
   --cache-control "no-cache" \
   --content-type "text/html; charset=utf-8"
 
 echo ">> 3/4 css e js (nome fixo) — sempre revalidar ..."
-aws s3 sync . "s3://$B" "${COMUM[@]}" \
-  --exclude "*" --include "*.css" --include "*.js" --exclude "assets/*" \
+aws s3 sync . "s3://$B" \
+  --exclude "*" --include "*.css" --include "*.js" \
+  --exclude ".git/*" --exclude "assets/*" \
   --cache-control "no-cache"
 
 # passe de faxina: os anteriores já subiram tudo, então este NÃO reenvia nada
