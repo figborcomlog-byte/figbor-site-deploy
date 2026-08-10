@@ -32,6 +32,11 @@
    ═══════════════════════════════════════════════════════════ */
 :root{
   --navy:#051D4C; --navy-2:#0A2C69; --deep:#03133A;
+  /* SUPERFICIE escura da marca (faixa, botao primario). Separada de --navy
+     porque --navy tambem e cor de TEXTO em 36 lugares: no tema noite um so
+     valor nao serve para os dois papeis — o texto sumiria no fundo. */
+  --surf:#051D4C;
+  --brt:rgba(255,255,255,.95);   /* barra do topo, translucida sobre o fundo */
   --ciano:#0097D6; --sinal:#0076A6;
   --ard:#3F566F; --mut:#5F7285;
   --br:#fff; --cz:#F4F7F9; --ln:#E3E9EF; --ln2:#CFD9E3;
@@ -56,7 +61,7 @@ a{color:var(--sinal);text-decoration:none}
 a:hover{text-decoration:underline}
 :focus-visible{outline:2px solid var(--ciano);outline-offset:3px}
 .w{max-width:var(--max);margin:0 auto;padding:0 var(--pd)}
-.pular{position:absolute;left:-9999px;background:var(--navy);color:#fff;padding:10px 16px;z-index:300}
+.pular{position:absolute;left:-9999px;background:var(--surf);color:#fff;padding:10px 16px;z-index:300}
 .pular:focus{left:0}
 
 /* etiqueta monoespaçada — o "sabor técnico" */
@@ -67,7 +72,7 @@ a:hover{text-decoration:underline}
 .btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 24px;
   border:1px solid transparent;border-radius:4px;font:500 15px/1 var(--txt);cursor:pointer}
 .btn:hover{text-decoration:none}
-.b1{background:var(--navy);color:#fff}
+.b1{background:var(--surf);color:#fff}
 .b1:hover{background:var(--navy-2)}
 .b2{border-color:var(--ln2);color:var(--navy)}
 .b2:hover{border-color:var(--ard)}
@@ -99,7 +104,7 @@ a:hover{text-decoration:underline}
   .ctx .u:first-child{border-top:0;margin-top:0}
 }
 /* porta da intranet */
-.porta{margin-top:26px;border:1px solid var(--ln2);border-radius:4px;background:#fff;
+.porta{margin-top:26px;border:1px solid var(--ln2);border-radius:4px;background:var(--br);
   padding:20px 22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 .porta .txt{flex:1 1 320px}
 .porta .rt{font:500 11px/1 var(--mono);letter-spacing:.05em;color:var(--mut);text-transform:uppercase}
@@ -116,8 +121,8 @@ a:hover{text-decoration:underline}
    no meio do milhar, e a barra é preenchida de verdade.
    Escala proporcional: o miolo tem 1180 px de projeto e é reduzido
    por transform, então nada reflui — comporta-se como uma captura. */
-.ap-wrap{position:relative;overflow:hidden;width:100%;aspect-ratio:1180/960;background:#fff}
-.ap{position:absolute;top:0;left:0;width:1180px;transform-origin:top left;background:#fff;
+.ap-wrap{position:relative;overflow:hidden;width:100%;aspect-ratio:1180/960;background:var(--br)}
+.ap{position:absolute;top:0;left:0;width:1180px;transform-origin:top left;background:var(--br);
   color:var(--navy);font-family:var(--txt);font-size:14px;line-height:1.5}
 .ap *{box-sizing:border-box;margin:0}
 
@@ -128,7 +133,7 @@ a:hover{text-decoration:underline}
 .ap-lg b{font:700 19px/1 var(--tit);letter-spacing:-.022em;color:var(--navy)}
 .ap-lg b span{color:var(--ciano)}
 .ap-lg em{font:500 10px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;
-  color:#fff;background:var(--navy);padding:5px 8px;border-radius:3px;font-style:normal}
+  color:#fff;background:var(--surf);padding:5px 8px;border-radius:3px;font-style:normal}
 .ap-nav{display:flex;gap:4px}
 .ap-mi{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:4px;
   font:500 13px/1 var(--txt);color:var(--mut)}
@@ -138,7 +143,7 @@ a:hover{text-decoration:underline}
 .ap-usr{margin-left:auto;display:flex;align-items:center;gap:9px}
 .ap-ic{width:31px;height:31px;border:1px solid var(--ln);border-radius:4px;display:flex;
   align-items:center;justify-content:center;font-size:13px;color:var(--ard)}
-.ap-av{width:27px;height:27px;border-radius:50%;background:var(--navy);color:#fff;
+.ap-av{width:27px;height:27px;border-radius:50%;background:var(--surf);color:#fff;
   display:flex;align-items:center;justify-content:center;font:600 12px/1 var(--txt);flex:0 0 auto}
 .ap-un{font:500 12.5px/1 var(--txt);color:var(--navy);white-space:nowrap}
 .ap-un em{font:500 10px/1 var(--mono);letter-spacing:.07em;color:var(--mut);font-style:normal}
@@ -148,16 +153,16 @@ a:hover{text-decoration:underline}
 .ap-hd h4{font:700 23px/1.15 var(--tit);letter-spacing:-.022em}
 .ap-hd p{margin-top:7px;font-size:12.5px;line-height:1.55;color:var(--ard);max-width:640px}
 .ap-bts{margin-left:auto;flex:0 0 auto;display:flex;gap:8px}
-.ap-bt{background:#fff;border:1px solid var(--ln2);color:var(--navy);border-radius:4px;
+.ap-bt{background:var(--br);border:1px solid var(--ln2);color:var(--navy);border-radius:4px;
   padding:10px 15px;font:500 12.5px/1 var(--txt);white-space:nowrap}
-.ap-bt.pr{background:var(--navy);border-color:var(--navy);color:#fff}
+.ap-bt.pr{background:var(--surf);border-color:var(--surf);color:#fff}
 .ap-sub{display:flex;gap:2px;margin-top:16px;border-bottom:1px solid var(--ln)}
 .ap-si{padding:9px 14px;font:500 12.5px/1 var(--txt);color:var(--mut);
   border-bottom:2px solid transparent}
 .ap-si.on{color:var(--navy);border-bottom-color:var(--ciano)}
 
 .ap-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:11px;margin-top:16px}
-.ap-k{background:#fff;border:1px solid var(--ln);border-left:3px solid var(--ln2);
+.ap-k{background:var(--br);border:1px solid var(--ln);border-left:3px solid var(--ln2);
   border-radius:4px;padding:12px 13px}
 .ap-k-ci{border-left-color:var(--ciano)}
 .ap-k-nv{border-left-color:var(--navy)}
@@ -169,7 +174,7 @@ a:hover{text-decoration:underline}
 .ap-ks{margin-top:5px;font:400 10.5px/1.4 var(--mono);color:var(--mut);white-space:nowrap}
 
 .ap-two{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}
-.ap-bx{background:#fff;border:1px solid var(--ln);border-radius:4px;margin-top:13px}
+.ap-bx{background:var(--br);border:1px solid var(--ln);border-radius:4px;margin-top:13px}
 .ap-two .ap-bx{margin-top:0}
 .ap-bh{display:flex;align-items:baseline;gap:12px;padding:13px 16px;border-bottom:1px solid var(--ln)}
 .ap-bh h5{font:600 14px/1 var(--tit);letter-spacing:-.015em}
@@ -201,36 +206,36 @@ a:hover{text-decoration:underline}
 .ap-ct{font:400 11.5px/1 var(--txt);color:var(--ard);white-space:nowrap}
 .ap-cv{display:inline-block;padding:4px 8px;border-radius:3px;font:500 9.5px/1 var(--mono);
   letter-spacing:.06em;text-transform:uppercase}
-.ap-cv-a{background:var(--navy);color:#fff}
-.ap-cv-b{background:#fff;border:1px solid var(--ln2);color:var(--ard)}
+.ap-cv-a{background:var(--surf);color:#fff}
+.ap-cv-b{background:var(--br);border:1px solid var(--ln2);color:var(--ard)}
 
 
 /* ── painel nativo, versão celular (390 × 844 de projeto) ─────────────
    Abas em linha única com esmaecimento à direita: era o empilhamento
    delas que atropelava os botões na captura antiga. */
-.am-wrap{position:relative;overflow:hidden;width:100%;aspect-ratio:390/844;background:#fff}
+.am-wrap{position:relative;overflow:hidden;width:100%;aspect-ratio:390/844;background:var(--br)}
 .am{position:absolute;top:0;left:0;width:390px;height:844px;transform-origin:top left;
   background:var(--apbg);color:var(--navy);font-family:var(--txt);font-size:13px;
   line-height:1.5;overflow:hidden}
 .am *{box-sizing:border-box;margin:0}
 
 .am-top{display:flex;align-items:center;gap:8px;height:50px;padding:0 14px;
-  background:#fff;border-bottom:1px solid var(--ln)}
+  background:var(--br);border-bottom:1px solid var(--ln)}
 .am-top .ap-ring{width:21px;height:21px;flex:0 0 auto}
 .am-top b{font:700 16px/1 var(--tit);letter-spacing:-.022em;color:var(--navy)}
 .am-top b span{color:var(--ciano)}
 .am-top em{font:500 8.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;
-  color:#fff;background:var(--navy);padding:4px 6px;border-radius:3px;font-style:normal}
-.am-av{margin-left:auto;width:25px;height:25px;border-radius:50%;background:var(--navy);
+  color:#fff;background:var(--surf);padding:4px 6px;border-radius:3px;font-style:normal}
+.am-av{margin-left:auto;width:25px;height:25px;border-radius:50%;background:var(--surf);
   color:#fff;display:flex;align-items:center;justify-content:center;font:600 11px/1 var(--txt)}
 
 .am-bd{padding:14px 14px 70px}
 .am-bd h4{font:700 17px/1.2 var(--tit);letter-spacing:-.022em}
 .am-ds{margin-top:6px;font-size:10.8px;line-height:1.5;color:var(--ard)}
 .am-bts{display:flex;gap:7px;margin-top:11px}
-.am-bt{border:1px solid var(--ln2);background:#fff;border-radius:4px;padding:8px 11px;
+.am-bt{border:1px solid var(--ln2);background:var(--br);border-radius:4px;padding:8px 11px;
   font:500 11px/1 var(--txt);color:var(--navy);white-space:nowrap}
-.am-bt.pr{background:var(--navy);border-color:var(--navy);color:#fff}
+.am-bt.pr{background:var(--surf);border-color:var(--surf);color:#fff}
 .am-sub{position:relative;display:flex;gap:3px;margin-top:12px;overflow:hidden;
   border-bottom:1px solid var(--ln)}
 .am-sub::after{content:"";position:absolute;right:0;top:0;bottom:0;width:30px;
@@ -240,7 +245,7 @@ a:hover{text-decoration:underline}
 .am-si.on{color:var(--navy);border-bottom-color:var(--ciano)}
 
 .am-kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.am-k{background:#fff;border:1px solid var(--ln);border-left:3px solid var(--ln2);
+.am-k{background:var(--br);border:1px solid var(--ln);border-left:3px solid var(--ln2);
   border-radius:4px;padding:9px 10px}
 .am-k-ci{border-left-color:var(--ciano)}
 .am-k-nv{border-left-color:var(--navy)}
@@ -251,7 +256,7 @@ a:hover{text-decoration:underline}
   white-space:nowrap;font-variant-numeric:tabular-nums}
 .am-ks{margin-top:4px;font:400 8.5px/1.4 var(--mono);color:var(--mut)}
 
-.am-bx{background:#fff;border:1px solid var(--ln);border-radius:4px;margin-top:12px}
+.am-bx{background:var(--br);border:1px solid var(--ln);border-radius:4px;margin-top:12px}
 .am-bh{display:flex;align-items:baseline;gap:10px;padding:11px 12px;border-bottom:1px solid var(--ln)}
 .am-bh h5{font:600 12.5px/1 var(--tit);letter-spacing:-.015em}
 .am-bh span{margin-left:auto;font:400 9px/1 var(--mono);color:var(--mut);white-space:nowrap}
@@ -265,7 +270,7 @@ a:hover{text-decoration:underline}
 .am-vl{flex:0 0 auto;min-width:80px;text-align:right;font:500 10px/1 var(--mono);
   color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
 
-.am-nav{position:absolute;left:0;right:0;bottom:0;height:56px;background:#fff;
+.am-nav{position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--br);
   border-top:1px solid var(--ln);display:flex;align-items:center}
 .am-ni{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:6px;
   font:500 9.5px/1 var(--mono);letter-spacing:.04em;color:var(--mut)}
@@ -291,23 +296,38 @@ a:hover{text-decoration:underline}
 .ap-ring circle:last-child{stroke:var(--ciano)}
 
 
-/* ── preto e branco ────────────────────────────────────────────────────
+/* ── tema NOITE ────────────────────────────────────────────────────────
    Não é filtro em cima da página: é a mesma folha de estilo com outra
-   paleta. Assim o contraste continua sob controle, em vez de sair do
-   que o navegador achar de dessaturar. Só as imagens levam filtro. */
-html.pb{
-  --navy:#101418; --navy-2:#252C33; --deep:#080A0C;
-  --ciano:#4A525B; --sinal:#2E353D;
-  --ard:#4A525B; --mut:#6E7780;
-  --br:#fff; --cz:#F5F5F6; --ln:#E4E5E6; --ln2:#C9CBCD;
-  --acl:#C3C8CD; --acl2:#C3C8CD; --sel:#F0F1F2; --trk:#E8E9EA;
-  --apbg:#F7F7F8; --sut:#FCFCFD; --gr:#E5E6E7;
-  --fone:#101418; --fone2:#3A4149;
-  --ci2:#5C656F; --ci3:#fff;
-  --avbg:#F2F2F2; --avln:#8C8C8C; --avtx:#3A3A3A; --avtx2:#161616;
-  --pdbg:#F0F0F0; --pdln:#D4D4D4;
+   paleta, para o contraste continuar sob controle.
+
+   O ponto delicado: --navy é cor de TEXTO em 36 lugares e era fundo em
+   outros 14. Aqui ele clareia (vira texto sobre fundo escuro), enquanto
+   --surf continua escuro — é a superfície da marca, a faixa e o botão
+   primário, que trazem texto branco cravado no CSS.
+
+   O ciano da marca sobe de #0097D6 para #2BADE3: sobre fundo escuro o tom
+   original fica pesado, e o contraste do brandbook foi calibrado para
+   texto sobre BRANCO. */
+html.noite{
+  color-scheme:dark;
+  --navy:#E7EEF7; --navy-2:#C4D6EC; --deep:#03070E;
+  --surf:#123A63;
+  --ciano:#2BADE3; --sinal:#7FC8EC;
+  --ard:#C2D2E4; --mut:#8DA2BA;
+  --br:#07172B; --brt:rgba(7,23,43,.92);
+  --cz:#0B2038; --ln:#173250; --ln2:#22456B;
+  /* --acl são os rótulos pequenos DENTRO da faixa escura (módulos, 01..04).
+     Em #3E86B8 sobre a faixa davam 2,93:1 — abaixo de qualquer mínimo. */
+  --acl:#A8CFEC; --acl2:#C2DEF3; --sel:#122C49; --trk:#173250;
+  --apbg:#0B2038; --sut:#0A1B30; --gr:#173250;
+  --fone:#E7EEF7; --fone2:#B4C7DC;
+  --ci2:#4FC3F7; --ci3:#03203C;
+  --avbg:#2A2413; --avln:#7A6320; --avtx:#EBDCA8; --avtx2:#F5EBC9;
+  --pdbg:#231F12; --pdln:#5C4E22;
 }
-html.pb img{filter:grayscale(1)}
+/* a marca é escura e some no fundo escuro: um leve clareamento resolve sem
+   trocar o arquivo de arte */
+html.noite .lg svg circle{stroke:var(--ciano)}
 
 /* botão de troca */
 .pb-bt{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;
@@ -316,11 +336,11 @@ html.pb img{filter:grayscale(1)}
 .pb-bt:hover{border-color:var(--ard);color:var(--navy)}
 .pb-bt .ic{width:13px;height:13px;border-radius:50%;border:1.5px solid currentColor;
   background:linear-gradient(90deg,currentColor 0 50%,transparent 50% 100%)}
-.pb-bt[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.pb-bt[aria-pressed="true"]{background:var(--surf);border-color:var(--surf);color:#fff}
 @media(max-width:900px){.pb-bt .tx{display:none}.pb-bt{padding:0 10px}}
 
 /* ── cabeçalho ── */
-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
+header{position:sticky;top:0;z-index:100;background:var(--brt);
   backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
 .nv{display:flex;align-items:center;gap:28px;height:74px}
 .nv .lg b{font-size:24px}
@@ -348,7 +368,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
 .tela-sangra .moldura{width:calc(100% + 120px);max-width:none}
 @media(max-width:1040px){.tela-sangra .moldura{width:100%}}
 .moldura{border:1px solid var(--ln2);border-bottom:0;border-radius:6px 6px 0 0;overflow:hidden;
-  background:#fff;box-shadow:0 -1px 0 #fff inset}
+  background:var(--br);box-shadow:0 -1px 0 #fff inset}
 .moldura .barra{display:flex;align-items:center;gap:7px;padding:9px 13px;border-bottom:1px solid var(--ln);
   background:var(--sut)}
 .moldura .barra i{width:9px;height:9px;border-radius:50%;background:var(--ln2);display:block}
@@ -356,7 +376,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
 .moldura img{width:100%}
 
 /* ── faixa de dados ── */
-.faixa{background:var(--navy);color:#fff;padding:34px 0}
+.faixa{background:var(--surf);color:#fff;padding:34px 0}
 .faixa .g{display:grid;grid-template-columns:repeat(4,1fr);gap:34px}
 .faixa .it b{display:block;font:700 30px/1 var(--tit);color:#fff}
 .faixa .it span{display:block;margin-top:7px;font:400 12px/1.5 var(--mono);
@@ -386,7 +406,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
 .dl div{display:flex;gap:14px;padding:11px 0;border-top:1px solid var(--ln)}
 .dl dt{flex:0 0 128px;font:500 11px/1.5 var(--mono);letter-spacing:.04em;color:var(--mut);text-transform:uppercase}
 .dl dd{margin:0;font-size:14px;line-height:1.6;color:var(--navy)}
-.shot{border:1px solid var(--ln2);border-radius:5px;overflow:hidden;background:#fff}
+.shot{border:1px solid var(--ln2);border-radius:5px;overflow:hidden;background:var(--br)}
 .shot .barra{display:flex;align-items:center;gap:6px;padding:8px 11px;border-bottom:1px solid var(--ln);background:var(--sut)}
 .shot .barra i{width:8px;height:8px;border-radius:50%;background:var(--ln2)}
 .shot .barra span{margin-left:8px;font:400 10.5px/1 var(--mono);color:var(--mut)}
@@ -396,10 +416,10 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
 /* ── visor de apps: alternância web / mobile ── */
 .ctrl{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:34px}
 .seg{display:inline-flex;border:1px solid var(--ln2);border-radius:4px;overflow:hidden}
-.seg button{appearance:none;background:#fff;border:0;padding:10px 18px;
+.seg button{appearance:none;background:var(--br);border:0;padding:10px 18px;
   font:500 13px/1 var(--mono);letter-spacing:.04em;color:var(--mut);cursor:pointer;text-transform:uppercase}
 .seg button+button{border-left:1px solid var(--ln2)}
-.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.seg button[aria-pressed="true"]{background:var(--surf);color:#fff}
 .ctrl .dica{font:400 12px/1.5 var(--mono);color:var(--mut)}
 
 .palco{display:grid;grid-template-columns:.82fr 1.18fr;gap:46px;align-items:start;padding-top:28px}
@@ -407,7 +427,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
 .vitrine{display:flex;justify-content:center;align-items:flex-start;min-height:300px}
 
 /* moldura de navegador */
-.fr-web{width:100%;border:1px solid var(--ln2);border-radius:6px;overflow:hidden;background:#fff}
+.fr-web{width:100%;border:1px solid var(--ln2);border-radius:6px;overflow:hidden;background:var(--br)}
 .fr-web .tb{display:flex;align-items:center;gap:6px;padding:8px 11px;
   border-bottom:1px solid var(--ln);background:var(--sut)}
 .fr-web .tb i{width:8px;height:8px;border-radius:50%;background:var(--ln2);flex:0 0 auto}
@@ -421,8 +441,8 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
   box-shadow:0 18px 40px -20px rgba(5,29,76,.4)}
 .fr-mob::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
   width:74px;height:5px;border-radius:99px;background:var(--fone2);z-index:3}
-.fr-mob img{width:100%;display:block;border-radius:26px;background:#fff}
-.fr-mob .am-wrap{border-radius:26px;background:#fff}
+.fr-mob img{width:100%;display:block;border-radius:26px;background:var(--br)}
+.fr-mob .am-wrap{border-radius:26px;background:var(--br)}
 
 .vis-oculto{display:none}
 @media(max-width:1040px){
@@ -471,7 +491,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);
 .cp label{display:block;font:500 11px/1.4 var(--mono);letter-spacing:.05em;
   color:var(--mut);text-transform:uppercase;margin-bottom:7px}
 input,textarea,select{width:100%;padding:12px 13px;border:1px solid var(--ln2);border-radius:4px;
-  font:400 15px/1.5 var(--txt);color:var(--navy);background:#fff}
+  font:400 15px/1.5 var(--txt);color:var(--navy);background:var(--br)}
 textarea{min-height:104px;resize:vertical}
 .d2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .av{margin-top:14px;padding:12px 14px;background:var(--avbg);border-left:2px solid var(--avln);
@@ -540,11 +560,12 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
       <a href="#contato">Contato</a>
     </nav>
     <div class="dir">
+      <!-- rótulo e estado são preenchidos pelo script: ele começa pela
+           preferência do sistema, então o texto certo só se sabe em runtime -->
       <button class="pb-bt" id="pb" type="button" aria-pressed="false"
-        aria-label="Alternar o site para preto e branco"><span class="ic" aria-hidden="true"></span><span class="tx">P&amp;B</span></button>
-      <!-- ENTRAR vai direto para o login do Portal. Enquanto o endereco proprio
-           (figbor.com.br/hub) nao esta no ar, aponta para a maquina do app. -->
-      <a class="ent" href="https://fefo.figbor.com.br/" title="Entrar no Portal Figbor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Entrar</a>
+        aria-label="Mudar para o tema escuro" title="Tema escuro"><span class="ic" aria-hidden="true"></span><span class="tx">Noite</span></button>
+      <!-- ENTRAR vai direto para o login do Portal, no mesmo dominio do site. -->
+      <a class="ent" href="/hub/" title="Entrar no Portal Figbor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Entrar</a>
       <a class="btn b1" href="#contato">Agendar diagnóstico</a>
       <button class="bg" id="bg" aria-expanded="false" aria-controls="mm" aria-label="Abrir menu">≡</button>
     </div>
@@ -1003,7 +1024,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
             <p>Login de servidor no ar. Administrador entra por usuário e senha; o operador,
               por link que trava no primeiro aparelho que abrir.</p>
           </div>
-          <a class="btn b2" href="https://fefo.figbor.com.br/">Entrar no Portal</a>
+          <a class="btn b2" href="/hub/">Entrar no Portal</a>
         </div>
       </div>
       <div>
@@ -1116,16 +1137,28 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(window.__figborFit);
 })();
 
-/* preto e branco: troca a paleta inteira, inclusive a dos painéis */
+/* noite / dia: troca a paleta inteira, inclusive a dos painéis.
+   Começa pela preferência do sistema — quem já usa o computador no escuro
+   não deve levar um clarão ao abrir o site — e depois obedece à escolha
+   feita aqui, que fica guardada no navegador. */
 (function(){
-  const b=document.getElementById('pb'), r=document.documentElement;
-  b.addEventListener('click',function(){
-    const on=r.classList.toggle('pb');
+  const b=document.getElementById('pb'), r=document.documentElement, K='figbor-tema';
+  const rotulo=on=>{
     b.setAttribute('aria-pressed',String(on));
-    b.setAttribute('aria-label', on ? 'Voltar às cores da marca'
-                                    : 'Alternar o site para preto e branco');
+    b.setAttribute('aria-label', on ? 'Mudar para o tema claro' : 'Mudar para o tema escuro');
+    b.title = on ? 'Tema claro' : 'Tema escuro';
+    const tx=b.querySelector('.tx'); if(tx) tx.textContent = on ? 'Dia' : 'Noite';
     const mt=document.querySelector('meta[name="theme-color"]');
-    if(mt) mt.setAttribute('content', on ? '#101418' : '#051D4C');
+    if(mt) mt.setAttribute('content', on ? '#07172B' : '#051D4C');
+  };
+  const guardado=localStorage.getItem(K);
+  const escuro = guardado ? guardado==='noite'
+                          : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.classList.toggle('noite',escuro); rotulo(escuro);
+  b.addEventListener('click',function(){
+    const on=r.classList.toggle('noite');
+    localStorage.setItem(K, on?'noite':'dia');
+    rotulo(on);
   });
 })();
 
