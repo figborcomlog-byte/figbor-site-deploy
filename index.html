@@ -358,18 +358,25 @@ header{position:sticky;top:0;z-index:100;background:var(--brt);
 .mm.on{display:block}
 .mm a{display:block;padding:14px 0;border-bottom:1px solid var(--ln);font:500 16px/1 var(--txt);color:var(--navy)}
 .mm a:last-child{border-bottom:0}
+/* o último link da lista ("Contato") deixou de ser o último filho quando o
+   rodapé de botões entrou: sem esta linha ficavam DOIS riscos paralelos a 18px
+   um do outro — o dele e o do .mm-pe. */
+.mm > a:last-of-type{border-bottom:0}
 /* o rodapé do menu: os dois botões empilhados, com ar entre eles e a lista */
 .mm-pe{display:flex;flex-direction:column;gap:10px;margin-top:18px;padding-top:18px;
   border-top:1px solid var(--ln)}
 /* ".mm a" tem especificidade maior que ".mm-ent" e impunha display:block —
-   com isso o gap do flex não valia e o cadeado ficava colado no texto. */
+   com isso o gap do flex não valia e o cadeado ficava colado no texto.
+   O "border:1px solid transparent" repõe a MOLDURA INTEIRA: zerar só o
+   border-bottom (para matar o risco divisor da lista) deixava o botão de
+   contorno com três lados — uma caixa aberta embaixo, feia de longe. */
 .mm-pe a.btn{display:inline-flex;align-items:center;justify-content:center;
-  width:100%;gap:8px;padding:14px 18px;border-bottom:0}
+  width:100%;gap:8px;padding:14px 18px;border:1px solid transparent}
 .mm-pe a.btn svg{width:14px;height:14px;flex:0 0 auto}
 /* a COR também precisa vencer o ".mm a": sem estas duas linhas o texto do botão
    primário fica marinho sobre marinho — some por completo. */
 .mm-pe a.b1{color:#fff}
-.mm-pe a.b2{color:var(--navy)}
+.mm-pe a.b2{color:var(--navy);border-color:var(--ln2)}
 
 /* ── hero: claim curto + tela real sangrando ── */
 .hero{padding:70px 0 26px;overflow:hidden}
