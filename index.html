@@ -7,17 +7,30 @@
 <meta name="description" content="Operação, comercial e IA com sistema rodando por trás. Veja os painéis, os cálculos e as integrações antes de contratar.">
 <meta name="theme-color" content="#051D4C">
 <link rel="canonical" href="https://figbor.com.br/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23051D4C'/%3E%3Cpath d='M23 17h20v7H30.5v8H41v7H30.5v14H23z' fill='%23fff'/%3E%3Crect x='23' y='17' width='20' height='3' fill='%230097D6'/%3E%3C/svg%3E">
+<!-- ícones: os arquivos oficiais do brandbook. O que estava aqui era um "F"
+     desenhado à mão em SVG dentro de um data URI — cabia na aba, mas não era
+     a marca. -->
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Figbor">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:url" content="https://figbor.com.br/">
 <meta property="og:title" content="Figbor · Consultoria em Operações, Vendas e IA">
 <meta property="og:description" content="Consultoria com sistema rodando por trás. Veja os painéis, os cálculos e as integrações antes de contratar.">
+<!-- sem og:image o link compartilhado no WhatsApp e no LinkedIn saía sem marca -->
+<meta property="og:image" content="https://figbor.com.br/assets/og-figbor.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Figbor · Consultoria em Operações, Vendas e IA">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://figbor.com.br/assets/og-figbor.png">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"Figbor",
-"url":"https://figbor.com.br/","description":"Consultoria em Operações, Vendas e IA",
+"url":"https://figbor.com.br/","logo":"https://figbor.com.br/assets/figbor-logo.png",
+"image":"https://figbor.com.br/assets/og-figbor.png",
+"description":"Consultoria em Operações, Vendas e IA",
 "areaServed":"BR","knowsAbout":["Gestão de estoque FEFO","Gestão comercial","PCP e OEE","Logística e roteirização","Integração com ERP Sankhya"]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -129,7 +142,7 @@ a:hover{text-decoration:underline}
 .ap-top{display:flex;align-items:center;gap:26px;height:60px;padding:0 22px;
   border-bottom:1px solid var(--ln)}
 .ap-lg{display:flex;align-items:center;gap:9px}
-.ap-ring{width:26px;height:26px;flex:0 0 auto}
+.ap-ring{width:26px;height:auto;flex:0 0 auto}
 .ap-lg b{font:700 19px/1 var(--tit);letter-spacing:-.022em;color:var(--navy)}
 .ap-lg b span{color:var(--ciano)}
 .ap-lg em{font:500 10px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;
@@ -221,7 +234,7 @@ a:hover{text-decoration:underline}
 
 .am-top{display:flex;align-items:center;gap:8px;height:50px;padding:0 14px;
   background:var(--br);border-bottom:1px solid var(--ln)}
-.am-top .ap-ring{width:21px;height:21px;flex:0 0 auto}
+.am-top .ap-ring{width:21px;height:auto;flex:0 0 auto}
 .am-top b{font:700 16px/1 var(--tit);letter-spacing:-.022em;color:var(--navy)}
 .am-top b span{color:var(--ciano)}
 .am-top em{font:500 8.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;
@@ -281,19 +294,29 @@ a:hover{text-decoration:underline}
 
 /* ── marca desenhada em SVG: nítida em qualquer tamanho, e acompanha
       a troca para preto e branco (o bitmap do brandbook não acompanha) ── */
-.mk{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+/* ── a marca ───────────────────────────────────────────────────────────
+   A marca é ARTE, não desenho. O símbolo da Figbor é um anel de line-art
+   com funil, gráfico de barras, alvo com flecha e pessoas; o que estava
+   aqui antes eram dois <circle> imitando um anel — parecido de longe,
+   errado de perto. Agora entra o arquivo oficial do brandbook.
+
+   São PNG porque NÃO EXISTE SVG da marca (o BRANDBOOK_FIGBOR_v1.pdf só
+   traz bitmap). O negativo (branco + ciano, para fundo escuro) foi
+   derivado do mesmo arquivo, respeitando a paleta oficial.
+
+   Cada marca vem em DUAS imagens, dia e noite, e o CSS mostra uma. Vêm
+   juntas de propósito: trocar o src na hora do clique faria a marca
+   sumir por um instante em toda troca de tema. */
+.dia-art{display:block}
+.neg-art{display:none}
+html.noite .dia-art{display:none}
+html.noite .neg-art{display:block}
+.mk{display:inline-flex;align-items:center;text-decoration:none}
 .mk:hover{text-decoration:none}
-.mk svg{flex:0 0 auto}
-.mk b{font:700 25px/1 var(--tit);letter-spacing:-.03em;color:var(--navy)}
-.mk b i{font-style:normal;color:var(--ciano)}
-.mk.neg b{color:#fff}
-.mk.neg b i{color:var(--acl)}
-.rg-b{fill:none;stroke:var(--ln2);stroke-width:3}
-.rg-a{fill:none;stroke:var(--ciano);stroke-width:3;stroke-linecap:round}
-.mk.neg .rg-b{stroke:rgba(255,255,255,.32)}
-.mk.neg .rg-a{stroke:var(--acl)}
-.ap-ring circle:first-child{stroke:var(--ln2)}
-.ap-ring circle:last-child{stroke:var(--ciano)}
+.mk img{height:auto;width:100%}
+/* o rodapé é escuro nos DOIS temas (--deep), então lá vale sempre o negativo */
+footer .mk .dia-art{display:none}
+footer .mk .neg-art{display:block}
 
 
 /* ── tema NOITE ────────────────────────────────────────────────────────
@@ -325,9 +348,8 @@ html.noite{
   --avbg:#2A2413; --avln:#7A6320; --avtx:#EBDCA8; --avtx2:#F5EBC9;
   --pdbg:#231F12; --pdln:#5C4E22;
 }
-/* a marca é escura e some no fundo escuro: um leve clareamento resolve sem
-   trocar o arquivo de arte */
-html.noite .lg svg circle{stroke:var(--ciano)}
+/* (a marca no tema escuro é resolvida trocando a ARTE, no bloco ".dia-art /
+   .neg-art" acima — clarear o traço de um desenho não servia mais) */
 
 /* botão de troca */
 .pb-bt{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;
@@ -343,13 +365,18 @@ html.noite .lg svg circle{stroke:var(--ciano)}
 header{position:sticky;top:0;z-index:100;background:var(--brt);
   backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
 .nv{display:flex;align-items:center;gap:28px;height:74px}
-.nv .lg b{font-size:24px}
+/* o lockup traz o símbolo, a palavra e a assinatura numa peça só: a largura
+   é o que define o tamanho, e a altura vem do arquivo (440x155) */
+.nv .lg{width:158px;flex:0 0 auto}
 .nv nav{display:flex;gap:24px;margin-left:8px}
 .nv nav a{font:500 14px/1 var(--txt);color:var(--ard)}
 .nv nav a:hover{color:var(--navy);text-decoration:none}
 .nv .dir{margin-left:auto;display:flex;align-items:center;gap:16px}
 .nv .ent{font:500 13px/1 var(--mono);color:var(--mut);letter-spacing:.04em}
-.bg{display:none;width:42px;height:42px;border:1px solid var(--ln2);background:none;
+/* 44x44 é o alvo mínimo de toque (Apple HIG). A 42 px, colado na borda, o
+   botão mais crítico do celular erra o dedo de vez em quando — e quem erra
+   duas vezes conclui que "não funciona". */
+.bg{display:none;width:44px;height:44px;border:1px solid var(--ln2);background:none;
   border-radius:4px;font-size:18px;color:var(--navy);cursor:pointer}
 /* menu móvel: a lista rola se não couber (celular baixo, teclado aberto ou
    texto ampliado), em vez de empurrar o botão para fora da tela */
@@ -456,7 +483,11 @@ header{position:sticky;top:0;z-index:100;background:var(--brt);
 .fr-web .tb i{width:8px;height:8px;border-radius:50%;background:var(--ln2);flex:0 0 auto}
 .fr-web .tb span{margin-left:8px;font:400 10.5px/1 var(--mono);color:var(--mut);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fr-web img{width:100%;display:block}
+/* ">" de propósito: a regra vale para a CAPTURA que preenche a moldura, não
+   para toda imagem lá dentro. Sem isso ela alcançava o selo da marca no topo
+   do painel falso e o esticava até a largura da tela fingida — e, pior,
+   forçava display:block nos dois temas ao mesmo tempo. */
+.fr-web > img{width:100%;display:block}
 
 /* moldura de celular */
 .fr-mob{width:290px;max-width:100%;border:9px solid var(--fone);border-radius:34px;
@@ -464,7 +495,7 @@ header{position:sticky;top:0;z-index:100;background:var(--brt);
   box-shadow:0 18px 40px -20px rgba(5,29,76,.4)}
 .fr-mob::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
   width:74px;height:5px;border-radius:99px;background:var(--fone2);z-index:3}
-.fr-mob img{width:100%;display:block;border-radius:26px;background:var(--br)}
+.fr-mob > img{width:100%;display:block;border-radius:26px;background:var(--br)}
 .fr-mob .am-wrap{border-radius:26px;background:var(--br)}
 
 .vis-oculto{display:none}
@@ -531,9 +562,9 @@ textarea{min-height:104px;resize:vertical}
 footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
 .ft{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;
   padding-bottom:30px;border-bottom:1px solid rgba(255,255,255,.14)}
-.ft img{width:168px}
-.ft .ds{margin-top:14px;font:400 11px/1.6 var(--mono);letter-spacing:.07em;
-  color:rgba(255,255,255,.5);text-transform:uppercase}
+/* o lockup do rodapé já traz "CONSULTORIA EM OPERAÇÕES, VENDAS E IA" impresso
+   na arte: a linha de texto que repetia isso embaixo saiu */
+.ft .mk{width:196px}
 .fc{display:flex;gap:56px;flex-wrap:wrap}
 .fc div h5{margin:0;font:500 11px/1 var(--mono);letter-spacing:.07em;color:var(--acl2);text-transform:uppercase}
 .fc div a,.fc div span{display:block;margin-top:11px;font-size:14px;color:rgba(255,255,255,.72)}
@@ -543,7 +574,14 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
 
 @media(max-width:1040px){
   .hero .cima{grid-template-columns:1fr;gap:26px;align-items:start}
-  .nv nav,.nv .ent{display:none}
+  .nv nav{display:none}
+  /* O ENTRAR FICA NA BARRA. Ele estava escondido junto com o menu: no celular
+     a barra do topo é o único lugar onde se procura a porta de entrada, e sem
+     ele o sistema ficava atrás de um menu sanduíche que ninguém abre para
+     "entrar". Aqui ele deixa de ser link discreto e vira botão de contorno. */
+  .nv .ent{height:36px;padding:0 12px;border:1px solid var(--ln2);border-radius:4px;
+    color:var(--navy);gap:6px}
+  .nv .ent svg{opacity:1}
   .bg{display:inline-flex;align-items:center;justify-content:center}
   .faixa .g{grid-template-columns:1fr 1fr;gap:26px}
   .pan .linha,.hub,.ct-g{grid-template-columns:1fr;gap:28px}
@@ -559,12 +597,28 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
   :root{--pd:20px}
   .s{padding:56px 0}
   .d2{grid-template-columns:1fr}
-  .nv .lg{margin-right:4px}
+  /* a barra do celular carrega marca + tema + ENTRAR + menu: sem apertar a
+     folga e a marca, o ENTRAR era o que sobrava para fora da tela */
+  .nv{gap:12px}
+  .nv .lg{width:126px;margin-right:0}
+  .nv .dir{gap:10px}
   .nv .dir .btn{display:none}          /* CTA sai do topo: já está no herói e no menu */
   .faixa .g{grid-template-columns:1fr}
   .dl div{flex-direction:column;gap:4px}
   .dl dt{flex:none}
   .hero .ct .btn{width:100%;justify-content:center}
+}
+/* Aparelhos estreitos (360 e 320 px ainda são comuns no chão de fábrica).
+   A conta da barra é implacável: marca + tema + ENTRAR + menu + as folgas
+   precisam caber na largura útil. Aqui tudo encolhe junto para que o ENTRAR
+   continue com a palavra escrita — um cadeado sozinho ninguém reconhece. */
+@media(max-width:400px){
+  :root{--pd:14px}
+  .nv{gap:8px}
+  .nv .lg{width:100px}
+  .nv .dir{gap:8px}
+  .pb-bt{padding:0 8px}
+  .nv .ent{padding:0 9px;font-size:12px;letter-spacing:.02em}
 }
 </style>
 </head>
@@ -573,7 +627,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
 
 <header>
   <div class="w nv">
-    <a class="mk lg" href="#top" aria-label="Figbor · página inicial"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle class="rg-b" cx="16" cy="16" r="13"/><circle class="rg-a" cx="16" cy="16" r="13" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>Fig<i>bor</i></b></a>
+    <a class="mk lg" href="#top" aria-label="Figbor · página inicial"><img class="dia-art" src="assets/figbor-logo.png" width="440" height="155" alt="Figbor · Consultoria em Operações, Vendas e IA"><img class="neg-art" src="assets/figbor-logo-neg.png" width="440" height="155" alt="" aria-hidden="true"></a>
     <nav aria-label="Principal">
       <a href="#rodando">O que roda</a>
       <a href="#onde">Onde roda</a>
@@ -677,7 +731,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
             <div class="ap-wrap" role="img" aria-label="Painel do módulo Estoque e WMS do Figbor, com dados de demonstração: itens em estoque, valor do estoque, a receber hoje, a expedir hoje, vencendo até 90d, rupturas, além de estoque por depósito, validade por faixa e lotes em atenção. Nenhum dado de cliente aparece aqui.">
 <div class="ap" aria-hidden="true">
   <div class="ap-top">
-    <span class="ap-lg"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Estoque</em></span>
+    <span class="ap-lg"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Estoque</em></span>
     <span class="ap-nav"><span class="ap-mi on"><i></i>Estoque</span><span class="ap-mi"><i></i>Comercial</span><span class="ap-mi"><i></i>Produção</span><span class="ap-mi"><i></i>Logística</span></span>
     <span class="ap-usr"><span class="ap-ic">⌂</span><span class="ap-ic">◐</span>
       <span class="ap-av">A</span><span class="ap-un">Administrador <em>· ADMIN</em></span></span>
@@ -704,7 +758,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
           <div class="fr-mob vis-oculto" data-vis="mob">
             <div class="am-wrap" role="img" aria-label="Versão para celular do Painel do módulo Estoque e WMS do Figbor, com dados de demonstração: itens em estoque, valor do estoque, a receber hoje, a expedir hoje, vencendo até 90d, rupturas, além de estoque por depósito, validade por faixa e lotes em atenção. Nenhum dado de cliente aparece aqui.">
 <div class="am" aria-hidden="true">
-  <div class="am-top"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Estoque</em>
+  <div class="am-top"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Estoque</em>
     <span class="am-av">A</span></div>
   <div class="am-bd">
     <h4>Estoque &amp; WMS</h4>
@@ -736,7 +790,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
             <div class="ap-wrap" role="img" aria-label="Painel do módulo Comercial e Vendas do Figbor, com dados de demonstração: faturamento do mês, meta do mês, % da meta, ticket médio, nº de pedidos, positivação, além de vendas por vendedor, faturamento por filial e principais clientes. Nenhum dado de cliente aparece aqui.">
 <div class="ap" aria-hidden="true">
   <div class="ap-top">
-    <span class="ap-lg"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Comercial</em></span>
+    <span class="ap-lg"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Comercial</em></span>
     <span class="ap-nav"><span class="ap-mi"><i></i>Estoque</span><span class="ap-mi on"><i></i>Comercial</span><span class="ap-mi"><i></i>Produção</span><span class="ap-mi"><i></i>Logística</span></span>
     <span class="ap-usr"><span class="ap-ic">⌂</span><span class="ap-ic">◐</span>
       <span class="ap-av">A</span><span class="ap-un">Administrador <em>· ADMIN</em></span></span>
@@ -763,7 +817,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
           <div class="fr-mob vis-oculto" data-vis="mob">
             <div class="am-wrap" role="img" aria-label="Versão para celular do Painel do módulo Comercial e Vendas do Figbor, com dados de demonstração: faturamento do mês, meta do mês, % da meta, ticket médio, nº de pedidos, positivação, além de vendas por vendedor, faturamento por filial e principais clientes. Nenhum dado de cliente aparece aqui.">
 <div class="am" aria-hidden="true">
-  <div class="am-top"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Comercial</em>
+  <div class="am-top"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Comercial</em>
     <span class="am-av">A</span></div>
   <div class="am-bd">
     <h4>Comercial &amp; Vendas</h4>
@@ -795,7 +849,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
             <div class="ap-wrap" role="img" aria-label="Painel do módulo Produção e PCP do Figbor, com dados de demonstração: oee do turno, produzido no turno, aderência ao plano, refugo, paradas, ordens abertas, além de produzido por linha, paradas por motivo e ordens de produção do turno. Nenhum dado de cliente aparece aqui.">
 <div class="ap" aria-hidden="true">
   <div class="ap-top">
-    <span class="ap-lg"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Produção</em></span>
+    <span class="ap-lg"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Produção</em></span>
     <span class="ap-nav"><span class="ap-mi"><i></i>Estoque</span><span class="ap-mi"><i></i>Comercial</span><span class="ap-mi on"><i></i>Produção</span><span class="ap-mi"><i></i>Logística</span></span>
     <span class="ap-usr"><span class="ap-ic">⌂</span><span class="ap-ic">◐</span>
       <span class="ap-av">A</span><span class="ap-un">Administrador <em>· ADMIN</em></span></span>
@@ -822,7 +876,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
           <div class="fr-mob vis-oculto" data-vis="mob">
             <div class="am-wrap" role="img" aria-label="Versão para celular do Painel do módulo Produção e PCP do Figbor, com dados de demonstração: oee do turno, produzido no turno, aderência ao plano, refugo, paradas, ordens abertas, além de produzido por linha, paradas por motivo e ordens de produção do turno. Nenhum dado de cliente aparece aqui.">
 <div class="am" aria-hidden="true">
-  <div class="am-top"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Produção</em>
+  <div class="am-top"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Produção</em>
     <span class="am-av">A</span></div>
   <div class="am-bd">
     <h4>Produção &amp; PCP</h4>
@@ -854,7 +908,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
             <div class="ap-wrap" role="img" aria-label="Painel do módulo Logística e Transporte do Figbor, com dados de demonstração: entregas do dia, entregue no prazo, rotas ativas, custo de frete, frete / faturamento, ocorrências, além de entregas por rota, custo de frete por filial e cargas em rota agora. Nenhum dado de cliente aparece aqui.">
 <div class="ap" aria-hidden="true">
   <div class="ap-top">
-    <span class="ap-lg"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Logística</em></span>
+    <span class="ap-lg"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Logística</em></span>
     <span class="ap-nav"><span class="ap-mi"><i></i>Estoque</span><span class="ap-mi"><i></i>Comercial</span><span class="ap-mi"><i></i>Produção</span><span class="ap-mi on"><i></i>Logística</span></span>
     <span class="ap-usr"><span class="ap-ic">⌂</span><span class="ap-ic">◐</span>
       <span class="ap-av">A</span><span class="ap-un">Administrador <em>· ADMIN</em></span></span>
@@ -881,7 +935,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
           <div class="fr-mob vis-oculto" data-vis="mob">
             <div class="am-wrap" role="img" aria-label="Versão para celular do Painel do módulo Logística e Transporte do Figbor, com dados de demonstração: entregas do dia, entregue no prazo, rotas ativas, custo de frete, frete / faturamento, ocorrências, além de entregas por rota, custo de frete por filial e cargas em rota agora. Nenhum dado de cliente aparece aqui.">
 <div class="am" aria-hidden="true">
-  <div class="am-top"><svg class="ap-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#CFD9E3" stroke-width="3"/><circle cx="16" cy="16" r="13" fill="none" stroke="#0097D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>FIG<span>BOR</span></b><em>Logística</em>
+  <div class="am-top"><img class="ap-ring dia-art" src="assets/figbor-symbol.png" width="160" height="156" alt="" aria-hidden="true"><img class="ap-ring neg-art" src="assets/figbor-symbol-neg.png" width="160" height="156" alt="" aria-hidden="true"><b>FIG<span>BOR</span></b><em>Logística</em>
     <span class="am-av">A</span></div>
   <div class="am-bd">
     <h4>Logística &amp; Transporte</h4>
@@ -1118,8 +1172,7 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
   <div class="w">
     <div class="ft">
       <div>
-        <span class="mk neg"><svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><circle class="rg-b" cx="16" cy="16" r="13"/><circle class="rg-a" cx="16" cy="16" r="13" stroke-dasharray="52 82" transform="rotate(-90 16 16)"/></svg><b>Fig<i>bor</i></b></span>
-        <p class="ds">Consultoria em Operações, Vendas e IA</p>
+        <span class="mk neg"><img class="dia-art" src="assets/figbor-logo.png" width="440" height="155" alt="" aria-hidden="true"><img class="neg-art" src="assets/figbor-logo-neg.png" width="440" height="155" alt="Figbor"></span>
       </div>
       <div class="fc">
         <div><h5>O que roda</h5>
@@ -1141,6 +1194,23 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
 </footer>
 
 <script>
+
+/* MENU MÓVEL PRIMEIRO, DE PROPÓSITO.
+   Este é um <script> só. Se qualquer bloco abaixo lançar — e o do tema lança
+   quando o celular está com "bloquear todos os cookies", porque aí até LER o
+   localStorage dá SecurityError — a execução para ali e o resto nunca é
+   ligado. O botão "≡" continua desenhado na tela e simplesmente não faz nada:
+   defeito invisível, e justo no único caminho do celular. Ligando o menu na
+   primeira linha, ele sobrevive a qualquer erro posterior. */
+(function(){
+  const bg=document.getElementById('bg'), mm=document.getElementById('mm');
+  if(!bg||!mm) return;
+  bg.addEventListener('click',()=>{const on=mm.classList.toggle('on');
+    bg.setAttribute('aria-expanded',String(on));
+    bg.setAttribute('aria-label',on?'Fechar menu':'Abrir menu');});
+  mm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+    mm.classList.remove('on'); bg.setAttribute('aria-expanded','false');}));
+})();
 
 /* painel nativo: reduz o miolo de 1180 px até a largura disponível,
    para que se comporte como captura (nada reflui) */
@@ -1180,24 +1250,18 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
     const mt=document.querySelector('meta[name="theme-color"]');
     if(mt) mt.setAttribute('content', on ? '#07172B' : '#051D4C');
   };
-  const guardado=localStorage.getItem(K);
+  /* ler e gravar o localStorage pode LANÇAR (cookies bloqueados, modo estrito,
+     navegador embutido de app). Sem guarda, o tema derrubava o script inteiro. */
+  let guardado=null; try{ guardado=localStorage.getItem(K); }catch{}
   const escuro = guardado ? guardado==='noite'
                           : matchMedia('(prefers-color-scheme: dark)').matches;
   r.classList.toggle('noite',escuro); rotulo(escuro);
   b.addEventListener('click',function(){
     const on=r.classList.toggle('noite');
-    localStorage.setItem(K, on?'noite':'dia');
+    try{ localStorage.setItem(K, on?'noite':'dia'); }catch{}
     rotulo(on);
   });
 })();
-
-/* menu móvel */
-const bg=document.getElementById('bg'), mm=document.getElementById('mm');
-bg.addEventListener('click',()=>{const on=mm.classList.toggle('on');
-  bg.setAttribute('aria-expanded',String(on));
-  bg.setAttribute('aria-label',on?'Fechar menu':'Abrir menu');});
-mm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
-  mm.classList.remove('on'); bg.setAttribute('aria-expanded','false');}));
 
 /* abas dos módulos — com teclado, como manda o padrão de tablist */
 const tabs=[...document.querySelectorAll('[role="tab"]')];

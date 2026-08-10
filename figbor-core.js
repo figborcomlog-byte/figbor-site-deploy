@@ -129,7 +129,13 @@
     var g=document.createElement("div");g.className="gate";g.id="figGate";
     g.innerHTML=''+
       '<div class="gatecard">'+
-        '<div class="gbrand"><img class="gate-logo" src="figbor-lockup.png" alt="FIGBOR"></div>'+
+        /* arte oficial do brandbook. O figbor-lockup.png que estava aqui era a
+           MARCA ANTIGA (cérebro em rede, azul e laranja) — outra empresa, na
+           prática. Duas imagens, uma por tema, como no site. */
+        '<div class="gbrand">'+
+          '<img class="gate-logo dia-art" src="assets/figbor-logo.png" alt="FIGBOR">'+
+          '<img class="gate-logo neg-art" src="assets/figbor-logo-neg.png" alt="" aria-hidden="true">'+
+        '</div>'+
         '<h2>Entrar</h2>'+
         '<p class="gsub">Acesse com seu e-mail ou usuário e a senha.</p>'+
         '<div class="field"><input id="figLiUser" placeholder="E-mail ou usuário" autocomplete="username"></div>'+
@@ -194,7 +200,10 @@
     }).join("")+'</nav>';
     host.innerHTML=''+
       '<header class="fig-top"><div class="wrap">'+
-        '<a class="fig-brand" href="FIGBOR.html"><img class="mk" src="figbor-icon.png" alt=""><span class="fig-wm"><span class="wfig">FIG</span><span class="wbor">BOR</span></span>'+modTag+'</a>'+
+        '<a class="fig-brand" href="FIGBOR.html">'+
+          '<img class="mk dia-art" src="assets/figbor-symbol.png" alt="">'+
+          '<img class="mk neg-art" src="assets/figbor-symbol-neg.png" alt="" aria-hidden="true">'+
+          '<span class="fig-wm"><span class="wfig">FIG</span><span class="wbor">BOR</span></span>'+modTag+'</a>'+
         nav+
         '<div class="fig-actions">'+
           (opts.actions||"")+
