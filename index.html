@@ -1147,9 +1147,9 @@ footer{background:var(--deep);color:rgba(255,255,255,.7);padding:52px 0 30px}
           </select></div>
         <div class="cp"><label for="f">O que não está funcionando</label>
           <textarea id="f" name="mensagem" placeholder="E como isso aparece no resultado hoje."></textarea></div>
+        <input type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0">
         <button class="btn b1" type="submit">Enviar</button>
-        <div class="av" id="av" role="status" aria-live="polite"><b>O formulário ainda não envia.</b> Falta ligá-lo a um destino —
-          e-mail, CRM ou webhook. Até então, use o contato ao lado.</div>
+        <div class="av" id="av" role="status" aria-live="polite">Resposta em até 1 dia útil. Seus dados vão só para a equipe FIGBOR.</div>
       </form>
       <div class="dados">
         <dl>
@@ -1305,13 +1305,22 @@ tabs.forEach((t,i)=>{
 
 document.getElementById('ano').textContent=new Date().getFullYear();
 
-/* formulário sem destino — não finge ter enviado */
+/* formulário -> Lambda (Amazon SES) */
 document.getElementById('fm').addEventListener('submit',ev=>{
   ev.preventDefault();
-  const a=document.getElementById('av');
-  a.innerHTML='<b>Nada foi enviado.</b> Este formulário não tem destino configurado. '+
-    'Defina um e-mail ou webhook e ele passa a funcionar.';
-  a.scrollIntoView({behavior:'smooth',block:'center'});
+  const f=ev.target, a=document.getElementById('av'), btn=f.querySelector('button[type=submit]');
+  if(!f.checkValidity()){ f.reportValidity(); return; }
+  const d={}; new FormData(f).forEach((v,k)=>{ d[k]=v; });
+  const lbl=btn.textContent; btn.disabled=true; btn.textContent='Enviando…'; a.textContent='Enviando…';
+  fetch('https://7q3ufifm4wtg6k7s13i44uetgq0rbcdf.lambda-url.us-east-2.on.aws/',{
+    method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(d)
+  }).then(res=>res.json().catch(()=>({ok:res.ok})))
+   .then(j=>{
+     if(j&&j.ok){ f.reset(); a.innerHTML='<b>Recebido.</b> Retornamos em até 1 dia útil.'; }
+     else{ a.innerHTML='<b>Não consegui enviar agora.</b> Tente de novo ou escreva para <a href="mailto:figborcomlog@gmail.com">figborcomlog@gmail.com</a>.'; }
+   }).catch(()=>{
+     a.innerHTML='<b>Não consegui enviar agora.</b> Tente de novo ou escreva para <a href="mailto:figborcomlog@gmail.com">figborcomlog@gmail.com</a>.';
+   }).finally(()=>{ btn.disabled=false; btn.textContent=lbl; a.scrollIntoView({behavior:'smooth',block:'center'}); });
 });
 </script>
 </body>
