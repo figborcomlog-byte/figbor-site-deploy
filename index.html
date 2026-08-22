@@ -1312,7 +1312,7 @@ document.getElementById('fm').addEventListener('submit',ev=>{
   if(!f.checkValidity()){ f.reportValidity(); return; }
   const d={}; new FormData(f).forEach((v,k)=>{ d[k]=v; });
   const lbl=btn.textContent; btn.disabled=true; btn.textContent='Enviando…'; a.textContent='Enviando…';
-  fetch('https://7q3ufifm4wtg6k7s13i44uetgq0rbcdf.lambda-url.us-east-2.on.aws/',{
+  fetch('https://731tf2rf4a.execute-api.us-east-2.amazonaws.com/',{
     method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(d)
   }).then(res=>res.json().catch(()=>({ok:res.ok})))
    .then(j=>{
